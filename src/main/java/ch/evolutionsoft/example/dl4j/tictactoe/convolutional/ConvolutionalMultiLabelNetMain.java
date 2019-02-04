@@ -1,8 +1,15 @@
 package ch.evolutionsoft.example.dl4j.tictactoe.convolutional;
 
-import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
-import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.*;
+import static ch.evolutionsoft.net.game.NeuralNetConstants.DEFAULT_BATCH_SIZE;
+import static ch.evolutionsoft.net.game.NeuralNetConstants.DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG;
+import static ch.evolutionsoft.net.game.NeuralNetConstants.DEFAULT_INPUT_LAYER_NAME;
+import static ch.evolutionsoft.net.game.NeuralNetConstants.DEFAULT_MAX_SCORE_EARLY_STOP;
+import static ch.evolutionsoft.net.game.NeuralNetConstants.DEFAULT_OUTPUT_LAYER_NAME;
 import static ch.evolutionsoft.net.game.NeuralNetConstants.DEFAULT_SEED;
+import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.IMAGE_CHANNELS;
+import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.IMAGE_SIZE;
+import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.MAX_PLAYER;
+import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.OCCUPIED;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,25 +24,20 @@ import org.deeplearning4j.earlystopping.trainer.EarlyStoppingGraphTrainer;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.ConvolutionMode;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.graph.ElementWiseVertex;
-import org.deeplearning4j.nn.conf.inputs.InputType;
-import org.deeplearning4j.nn.conf.layers.ActivationLayer;
-import org.deeplearning4j.nn.conf.layers.BatchNormalization;
+import org.deeplearning4j.nn.conf.graph.PreprocessorVertex;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
-import org.deeplearning4j.nn.conf.layers.GlobalPoolingLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
-import org.deeplearning4j.nn.conf.layers.PoolingType;
-import org.deeplearning4j.nn.conf.layers.SeparableConvolution2D;
-import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
+import org.deeplearning4j.nn.conf.preprocessor.CnnToFeedForwardPreProcessor;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
-import org.nd4j.evaluation.classification.Evaluation;
+import org.nd4j.evaluation.classification.EvaluationBinary;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Adam;
+import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
 import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +46,11 @@ import ch.evolutionsoft.example.dl4j.tictactoe.feedforward.FeedForwardCommon;
 import ch.evolutionsoft.net.game.NeuralDataHelper;
 import ch.evolutionsoft.net.game.tictactoe.TicTacToeNeuralDataConverter;
 
-public class ConvolutionalNetMain {
+public class ConvolutionalMultiLabelNetMain {
 
-  public static final double CONVOLUTION_LEARNING_RATE = 0.02;
+  public static final double CONVOLUTION_LEARNING_RATE = 0.01;
 
-  public static final int CONVOLUTION_NUMBER_OF_EPOCHS = 20;
+  public static final int CONVOLUTION_NUMBER_OF_EPOCHS = 10;
 
   public static final int CNN_OUTPUT_CHANNELS = 3;
 
@@ -56,7 +58,7 @@ public class ConvolutionalNetMain {
 
   public static void main(String[] args) throws Exception {
 
-    ConvolutionalNetMain convolutionalNetMain = new ConvolutionalNetMain();
+    ConvolutionalMultiLabelNetMain convolutionalNetMain = new ConvolutionalMultiLabelNetMain();
 
     ComputationGraph convolutionalNet = convolutionalNetMain.buildNetwork();
 
@@ -72,7 +74,7 @@ public class ConvolutionalNetMain {
   protected void evaluateNetwork(ComputationGraph graphNetwork, DataSet dataSet) {
 
     INDArray output = graphNetwork.outputSingle(dataSet.getFeatures());
-    Evaluation eval = new Evaluation(COLUMN_NUMBER);
+    EvaluationBinary eval = new EvaluationBinary(null);
     eval.eval(dataSet.getLabels(), output);
 
     if (logger.isInfoEnabled()) {
@@ -118,11 +120,10 @@ public class ConvolutionalNetMain {
   protected DataSet trainNetwork(ComputationGraph net)
       throws IOException {
 
-    List<Pair<INDArray, INDArray>> allPlaygroundsResults =
-        NeuralDataHelper.readAll(FeedForwardCommon.INPUTS_PATH, FeedForwardCommon.LABELS_PATH);
+    List<Pair<INDArray, INDArray>> allPlaygroundsResults = NeuralDataHelper.readAll(FeedForwardCommon.INPUTS_PATH, FeedForwardCommon.LABELS_PATH);
 
     List<Pair<INDArray, INDArray>> trainDataSetPairsList =
-        TicTacToeNeuralDataConverter.convertMiniMaxPlaygroundLabelsToConvolutionalData(allPlaygroundsResults);
+        TicTacToeNeuralDataConverter.generateMultiClassLabelsConvolutional(allPlaygroundsResults);
 
     NeuralDataHelper.printRandomConvolutionalNetInputAndLabels(trainDataSetPairsList,
         DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG);
@@ -159,73 +160,51 @@ public class ConvolutionalNetMain {
     return new NeuralNetConfiguration.Builder()
         .seed(DEFAULT_SEED)
         .updater(new Adam(CONVOLUTION_LEARNING_RATE))
-        .convolutionMode(ConvolutionMode.Strict)
-        .weightInit(WeightInit.RELU);
+        .convolutionMode(ConvolutionMode.Strict);
   }
 
   ComputationGraphConfiguration createConvolutionalGraphConfiguration() {
 
     return new ComputationGraphConfiguration.GraphBuilder(createGeneralConfiguration())
-        .addInputs("input").setInputTypes(InputType.convolutional(3, 3, 3))
-        // block1
-        .addLayer("block1_conv1",
-            new ConvolutionLayer.Builder(2, 2).stride(1, 1).nIn(3).nOut(8).hasBias(false)
-                .build(),
-            "input")
-        .addLayer("block1_conv1_bn", new BatchNormalization(), "block1_conv1")
-        .addLayer("block1_conv1_act", new ActivationLayer(Activation.RELU), "block1_conv1_bn")
-        .addLayer("block1_conv2",
-            new ConvolutionLayer.Builder(2, 2).stride(1, 1).padding(1, 1).nOut(16).hasBias(false)
-                .build(),
-            "block1_conv1_act")
-        .addLayer("block1_conv2_bn", new BatchNormalization(), "block1_conv2")
-        .addLayer("block1_conv2_act", new ActivationLayer(Activation.RELU), "block1_conv2_bn")
-
-        // residual1
-        .addLayer("residual1_conv",
-            new ConvolutionLayer.Builder(2, 2).stride(1, 1).nOut(24).hasBias(false)
-                .convolutionMode(ConvolutionMode.Same).build(),
-            "block1_conv2_act")
-        .addLayer("residual1", new BatchNormalization(), "residual1_conv")
-
-        // block2
-        .addLayer("block2_sepconv1",
-            new SeparableConvolution2D.Builder(2, 2).nOut(24).hasBias(false).convolutionMode(ConvolutionMode.Same)
-                .build(),
-            "block1_conv2_act")
-        .addLayer("block2_sepconv1_bn", new BatchNormalization(), "block2_sepconv1")
-        .addLayer("block2_sepconv1_act", new ActivationLayer(Activation.RELU), "block2_sepconv1_bn")
-        .addLayer("block2_sepconv2",
-            new SeparableConvolution2D.Builder(2, 2).nOut(24).hasBias(false).convolutionMode(ConvolutionMode.Same)
-                .build(),
-            "block2_sepconv1_act")
-        .addLayer("block2_sepconv2_bn", new BatchNormalization(), "block2_sepconv2")
-        .addLayer("block2_pool",
-            new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX).kernelSize(3, 3).stride(1, 1)
-                .convolutionMode(ConvolutionMode.Same).build(),
-            "block2_sepconv2_bn")
-        
-        .addVertex("add1", new ElementWiseVertex(ElementWiseVertex.Op.Add), "block2_pool", "residual1").
-
-        addLayer("block3_sepconv1",
-            new SeparableConvolution2D.Builder(2, 2).nOut(32).hasBias(false).convolutionMode(ConvolutionMode.Same)
-                .build(),
-            "add1")
-        .addLayer("block3_sepconv1_bn", new BatchNormalization(), "block3_sepconv1")
-        .addLayer("block3_sepconv1_act", new ActivationLayer(Activation.RELU), "block3_sepconv1_bn")
-        .addLayer("block3_sepconv2",
-            new SeparableConvolution2D.Builder(2, 2).nOut(32).hasBias(false).convolutionMode(ConvolutionMode.Same)
-                .build(),
-            "block3_sepconv1_act")
-        .addLayer("block3_sepconv2_bn", new BatchNormalization(), "block3_sepconv2")
-        .addLayer("block3_sepconv2_act", new ActivationLayer(Activation.RELU), "block3_sepconv2_bn")
-
-        .addLayer("avg_pool", new GlobalPoolingLayer.Builder(PoolingType.AVG).build(), "block3_sepconv2_act")
-        
-        .addLayer(DEFAULT_OUTPUT_LAYER_NAME, new OutputLayer.Builder()
+        .addInputs(DEFAULT_INPUT_LAYER_NAME)
+        .addLayer("cnn0", new ConvolutionLayer.Builder(1, 1)
+            .stride(1, 1)
+            .padding(0, 0)
+            .nIn(IMAGE_CHANNELS)
+            .nOut(22)
+            .convolutionMode(ConvolutionMode.Same)
+            .activation(Activation.LEAKYRELU)
+            .weightInit(WeightInit.RELU)
+            .build(), DEFAULT_INPUT_LAYER_NAME)
+        .addLayer("cnn1",
+            new ConvolutionLayer.Builder(1, 1)
+            .stride(1, 1)
+            .padding(0, 0)
+            .nIn(22)
+            .nOut(22)
+            .activation(Activation.LEAKYRELU)
+            .weightInit(WeightInit.RELU)
+            .build(),
+            "cnn0")
+        .addLayer("cnn2",
+            new ConvolutionLayer.Builder(1, 1)
+            .stride(1, 1)
+            .padding(0, 0)
+            .nIn(22)
+            .nOut(22)
+            .activation(Activation.LEAKYRELU)
+            .weightInit(WeightInit.RELU)
+            .build(),
+            "cnn1")
+        .addVertex("fc1-pre",
+            new PreprocessorVertex(new CnnToFeedForwardPreProcessor(IMAGE_SIZE, IMAGE_SIZE, 22)),
+            "cnn2")
+        .addLayer(DEFAULT_OUTPUT_LAYER_NAME, new OutputLayer.Builder(LossFunction.SQUARED_LOSS)
+            .nIn(198)
             .nOut(9)
-            .activation(Activation.SOFTMAX)
-            .build(), "avg_pool")
+            .activation(Activation.SIGMOID)
+            .weightInit(WeightInit.XAVIER)
+            .build(), "fc1-pre")
         .setOutputs(DEFAULT_OUTPUT_LAYER_NAME)
         .build();
   }

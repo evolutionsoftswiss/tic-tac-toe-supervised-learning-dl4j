@@ -1,7 +1,7 @@
 package ch.evolutionsoft.example.dl4j.tictactoe.feedforward;
 
-import static ch.evolutionsoft.example.dl4j.tictactoe.TicTacToeConstants.*;
-import static ch.evolutionsoft.example.dl4j.tictactoe.commonnet.NeuralNetConstants.*;
+import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
+import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,9 +13,9 @@ import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
 import org.deeplearning4j.earlystopping.termination.MaxEpochsTerminationCondition;
 import org.deeplearning4j.earlystopping.termination.MaxScoreIterationTerminationCondition;
 import org.deeplearning4j.earlystopping.trainer.EarlyStoppingTrainer;
-import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -23,18 +23,17 @@ import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.evolutionsoft.example.dl4j.tictactoe.commonnet.NeuralDataHelper;
-import ch.evolutionsoft.example.dl4j.tictactoe.commonnet.TicTacToeNeuralDataConverter;
+import ch.evolutionsoft.net.game.NeuralDataHelper;
+import ch.evolutionsoft.net.game.tictactoe.TicTacToeNeuralDataConverter;
 
 public class FeedForwardCommon {
 
   private static final Logger logger = LoggerFactory.getLogger(FeedForwardCommon.class);
 
-  public static final int NET_ITERATIONS = 15;
+  public static String INPUTS_PATH = "/inputs.txt";
+  public static String LABELS_PATH = "/labels.txt";
 
-  public static final double NESTEROVS_MOMENTUM = 0.99;
-
-  protected MultiLayerNetwork createNetworkModel(MultiLayerConfiguration multiLayerConfiguration) {
+  public MultiLayerNetwork createNetworkModel(MultiLayerConfiguration multiLayerConfiguration) {
 
     String message = "Build model ...";
     logger.info(message);
@@ -45,12 +44,12 @@ public class FeedForwardCommon {
     return net;
   }
 
-  protected DataSet trainNetworkModel(MultiLayerNetwork net) throws IOException {
+  public void trainNetworkModel(MultiLayerNetwork net) throws IOException {
 
     String message = "Generate adapted net input and labels ...";
     logger.info(message);
 
-    List<Pair<INDArray, INDArray>> allPlaygrounds = NeuralDataHelper.readAll();
+    List<Pair<INDArray, INDArray>> allPlaygrounds = NeuralDataHelper.readAll(INPUTS_PATH, LABELS_PATH);
     List<Pair<INDArray, INDArray>> convertedMiniMaxLabels = TicTacToeNeuralDataConverter.convertMiniMaxLabels(allPlaygrounds);
     
     List<Pair<INDArray, INDArray>> printExamples = NeuralDataHelper.printRandomFeedForwardNetInputAndLabels(
@@ -65,6 +64,12 @@ public class FeedForwardCommon {
     EarlyStoppingTrainer trainer = new EarlyStoppingTrainer(earlyStoppingConfiguration, net, dataSetIterator);
 
     trainer.fit();
+  }
+
+  public DataSet stackPlaygroundInputsLabels() {
+
+    List<Pair<INDArray, INDArray>> allPlaygrounds = NeuralDataHelper.readAll(INPUTS_PATH, LABELS_PATH);
+    List<Pair<INDArray, INDArray>> convertedMiniMaxLabels = TicTacToeNeuralDataConverter.convertMiniMaxLabels(allPlaygrounds);
 
     Pair<INDArray, INDArray> stackedPlaygroundLabels =
         TicTacToeNeuralDataConverter.stackFeedForwardPlaygroundLabels(convertedMiniMaxLabels);
@@ -72,7 +77,7 @@ public class FeedForwardCommon {
     return new org.nd4j.linalg.dataset.DataSet(stackedPlaygroundLabels.getFirst(), stackedPlaygroundLabels.getSecond());
   }
 
-  protected void evaluateNetworkPerformance(MultiLayerNetwork net, DataSet dataSet) {
+  public void evaluateNetworkPerformance(MultiLayerNetwork net, DataSet dataSet) {
 
     INDArray output = net.output(dataSet.getFeatures());
     Evaluation eval = new Evaluation(COLUMN_NUMBER);
