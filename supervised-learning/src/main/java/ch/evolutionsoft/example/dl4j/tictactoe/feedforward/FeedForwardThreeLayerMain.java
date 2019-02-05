@@ -17,17 +17,17 @@ import org.slf4j.LoggerFactory;
 
 import ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants;
 
-public class FeedForwardHiddenLayerMain {
+public class FeedForwardThreeLayerMain {
 
   private static final int NUMBER_OF_NODES = 42;
 
   private static final double LEARNING_RATE = 0.9;
 
-  private static final Logger logger = LoggerFactory.getLogger(FeedForwardHiddenLayerMain.class);
+  private static final Logger logger = LoggerFactory.getLogger(FeedForwardThreeLayerMain.class);
 
   public static void main(String[] args) throws IOException {
 
-    FeedForwardHiddenLayerMain hiddenLayerSetup = new FeedForwardHiddenLayerMain();
+    FeedForwardThreeLayerMain hiddenLayerSetup = new FeedForwardThreeLayerMain();
 
     FeedForwardCommon feedForwardCommon = new FeedForwardCommon();
     MultiLayerNetwork net = feedForwardCommon.createNetworkModel(
