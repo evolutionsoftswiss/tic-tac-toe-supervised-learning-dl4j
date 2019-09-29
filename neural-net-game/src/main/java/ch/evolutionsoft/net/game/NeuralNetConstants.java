@@ -14,7 +14,7 @@ public final class NeuralNetConstants {
 
   public static final int DEFAULT_NUMBER_OF_EPOCHS = 200;
 
-  public static final int DEFAULT_BATCH_SIZE = 4520;
+  public static final int DEFAULT_BATCH_SIZE = 512;
 
   public static final int DEFAULT_MAX_SCORE_EARLY_STOP = 100;
 

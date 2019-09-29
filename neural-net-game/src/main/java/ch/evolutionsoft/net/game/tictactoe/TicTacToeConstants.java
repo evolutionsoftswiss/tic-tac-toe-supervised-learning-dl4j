@@ -68,8 +68,8 @@ public final class TicTacToeConstants {
   public static final double MIN_PLAYER = -1.0;
   public static final double EMPTY_FIELD_VALUE = 0.0;
 
-  public static final INDArray CENTER_FIELD_MOVE = Nd4j.zeros(COLUMN_NUMBER).putScalar(FIELD_5, MAX_PLAYER);
-  public static final INDArray LAST_CORNER_FIELD_MOVE = Nd4j.zeros(COLUMN_NUMBER).putScalar(FIELD_9, MAX_PLAYER);
+  public static final INDArray CENTER_FIELD_MOVE = Nd4j.zeros(1, COLUMN_NUMBER).putScalar(FIELD_5, MAX_PLAYER);
+  public static final INDArray LAST_CORNER_FIELD_MOVE = Nd4j.zeros(1, COLUMN_NUMBER).putScalar(FIELD_9, MAX_PLAYER);
 
   /**
    * Result labels interpretation. MAX_WIN - 9 > DRAW_VALUE > MIN_WIN + 9 for
