@@ -1,6 +1,9 @@
 TicTacToe with deep learning 4j
 ===============================
 
+Currently only the older committed version with dl4j-0.9.1 is performing well
+----------------------------------------------------------------------------- 
+
 This project provides three main classes FeedForwardTwoLayerMain.java, FeedForwardThreeLayerMain.java  ConvolutionalNetMain.java with different net layouts.
 
 Use your favorite IDE or build with mvn to execute the net learning with the present input and labels.

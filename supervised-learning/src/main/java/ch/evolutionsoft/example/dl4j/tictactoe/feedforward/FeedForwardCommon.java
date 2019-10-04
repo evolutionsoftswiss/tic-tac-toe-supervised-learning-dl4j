@@ -98,7 +98,7 @@ public class FeedForwardCommon {
         .epochTerminationConditions(new MaxEpochsTerminationCondition(DEFAULT_NUMBER_OF_EPOCHS))
         .iterationTerminationConditions(new MaxScoreIterationTerminationCondition(DEFAULT_MAX_SCORE_EARLY_STOP))
         .scoreCalculator(new DataSetLossCalculator(dataSetIterator, true))
-        .evaluateEveryNEpochs(1)
+        .evaluateEveryNEpochs(20)
         .modelSaver(new InMemoryModelSaver<>())
         .build();
   }

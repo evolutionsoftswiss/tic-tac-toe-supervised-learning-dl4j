@@ -2,6 +2,7 @@ package ch.evolutionsoft.net.game;
 
 import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class NeuralDataHelper {
 
   public static List<Pair<INDArray, INDArray>> readAll(String inputPath, String labelPath) {
 
-    List<Pair<INDArray, INDArray>> allPlaygroundsResult = new LinkedList<>();
+    List<Pair<INDArray, INDArray>> allPlaygroundsResult = new ArrayList<>();
 
     INDArray inputs = readInputs(inputPath);
     INDArray labels = readLabels(labelPath);
