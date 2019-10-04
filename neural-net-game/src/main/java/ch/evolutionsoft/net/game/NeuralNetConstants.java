@@ -12,11 +12,13 @@ public final class NeuralNetConstants {
 
   public static final Random randomGenerator = new Random(DEFAULT_SEED);
 
-  public static final int DEFAULT_NUMBER_OF_EPOCHS = 200;
+  public static final int DEFAULT_NUMBER_OF_EPOCHS = 3000;
 
-  public static final int DEFAULT_BATCH_SIZE = 512;
+  public static final int DEFAULT_BATCH_SIZE = 4608;
 
-  public static final int DEFAULT_MAX_SCORE_EARLY_STOP = 100;
+  public static final int DEFAULT_MAX_SCORE_EARLY_STOP = 10;
+  
+  public static final int MEDIUM_CAPACITY = 5000;
 
   public static final int DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG = 1;
 

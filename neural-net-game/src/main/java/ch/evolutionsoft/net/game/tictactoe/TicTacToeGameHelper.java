@@ -148,7 +148,7 @@ public class TicTacToeGameHelper {
       return true;
     }
 
-    return Math.abs(a - b) < epsilon;
+    return Math.abs(a - b) <= epsilon;
   }
 
   public static boolean hasWon(INDArray actualPlayGround, double player) {
