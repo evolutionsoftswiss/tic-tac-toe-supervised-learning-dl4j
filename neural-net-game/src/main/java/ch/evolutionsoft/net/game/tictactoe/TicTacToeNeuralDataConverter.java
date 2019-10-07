@@ -168,6 +168,13 @@ public class TicTacToeNeuralDataConverter {
       INDArray currentResult = allPlaygroundsResults.get(index).getSecond();
       INDArray adaptedResult = convertMiniMaxResultToBinaryNetLabel(currentPlayground, currentResult);
 
+      
+      if (!isMaxMove(currentPlayground)) {
+
+    	int stones = countStones(currentPlayground);
+    	currentPlayground = currentPlayground.div(COLUMN_NUMBER - stones + 1);
+      }
+      
       adaptedPlaygroundsLabels.add(new Pair<>(currentPlayground, adaptedResult));
     }
 
