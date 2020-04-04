@@ -8,13 +8,15 @@ public final class NeuralNetConstants {
     // Hide constructor
   }
 
-  public static final long DEFAULT_SEED = 2357;
+  public static final Integer DEFAULT_SEED = 2357;
 
   public static final Random randomGenerator = new Random(DEFAULT_SEED);
 
-  public static final int DEFAULT_NUMBER_OF_EPOCHS = 3000;
+  public static final int DEFAULT_NUMBER_OF_EPOCHS = 2000;
+  
+  public static final int DEFAULT_NUMBER_OF_PRINT_EPOCHS = 20;
 
-  public static final int DEFAULT_BATCH_SIZE = 4608;
+  public static final int DEFAULT_BATCH_SIZE = 4520;
 
   public static final int DEFAULT_MAX_SCORE_EARLY_STOP = 10;
   

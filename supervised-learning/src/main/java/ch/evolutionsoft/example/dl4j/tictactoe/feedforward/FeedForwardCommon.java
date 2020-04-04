@@ -6,19 +6,20 @@ import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.*;
 import java.io.IOException;
 import java.util.List;
 
-import org.deeplearning4j.datasets.iterator.INDArrayDataSetIterator;
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
 import org.deeplearning4j.earlystopping.saver.InMemoryModelSaver;
 import org.deeplearning4j.earlystopping.scorecalc.DataSetLossCalculator;
 import org.deeplearning4j.earlystopping.termination.MaxEpochsTerminationCondition;
 import org.deeplearning4j.earlystopping.termination.MaxScoreIterationTerminationCondition;
-import org.deeplearning4j.earlystopping.trainer.EarlyStoppingTrainer;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.ops.impl.indexaccum.IMax;
 import org.nd4j.linalg.dataset.api.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,14 +57,53 @@ public class FeedForwardCommon {
         convertedMiniMaxLabels, DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG);
     NeuralDataHelper.printRandomMiniMaxData(printExamples, DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG);
     
-    DataSetIterator dataSetIterator = new INDArrayDataSetIterator(convertedMiniMaxLabels, allPlaygrounds.size());
+    net.addListeners(new ScoreIterationListener(DEFAULT_NUMBER_OF_PRINT_EPOCHS));
+    
+    for (int epochNumber = 0; epochNumber < DEFAULT_NUMBER_OF_EPOCHS; epochNumber++) {
+      
+      DataSet randomBalancedDataSet = getTrainDataSetWithMaxLabelExampleSize(convertedMiniMaxLabels);
+      
+      net.fit(randomBalancedDataSet);
+    }
+  }
 
-    EarlyStoppingConfiguration<MultiLayerNetwork> earlyStoppingConfiguration =
-        createEarlyStoppingConfiguration(dataSetIterator);
+  public DataSet getTrainDataSetWithMaxLabelExampleSize(List<Pair<INDArray, INDArray>> convertedMiniMaxLabels) {
 
-    EarlyStoppingTrainer trainer = new EarlyStoppingTrainer(earlyStoppingConfiguration, net, dataSetIterator);
+    Pair<INDArray, INDArray> stackedPlaygroundLabels =
+        TicTacToeNeuralDataConverter.stackFeedForwardPlaygroundLabels(convertedMiniMaxLabels);
+    
+    //labelStatistics1 = new int[] {1449, 421, 581, 313, 618, 227, 360, 170, 318}
+    INDArray labelStatisticsNdArray = stackedPlaygroundLabels.getSecond().sum(0);
+    
+    double[] labelStatistics = labelStatisticsNdArray.toDoubleVector();
+    double minOccurance = Nd4j.min(labelStatisticsNdArray).toDoubleVector()[0];
+    
+    int stackedSize = (int) minOccurance * COLUMN_COUNT;
+    
+    INDArray stackedPlaygrounds = Nd4j.zeros(stackedSize, COLUMN_COUNT);
+    INDArray stackedLabels = Nd4j.zeros(stackedSize, COLUMN_COUNT);
 
-    trainer.fit();
+    double[] ratios = new double[] {minOccurance / labelStatistics[0], minOccurance / labelStatistics[1],minOccurance / labelStatistics[2],
+        minOccurance / labelStatistics[3],minOccurance / labelStatistics[4],minOccurance / labelStatistics[5],
+        minOccurance / labelStatistics[6],minOccurance / labelStatistics[7],minOccurance / labelStatistics[8]};
+    
+    for (int totalIndex = 0, stackedIndex = 0; stackedIndex < stackedSize; totalIndex++) {
+
+      INDArray currentLabel = stackedPlaygroundLabels.getSecond().getRow(totalIndex);
+      int currentLabelIndex = Nd4j.getExecutioner().execAndReturn(new IMax(currentLabel)).getFinalResult().intValue();
+      
+      if (randomGenerator.nextDouble() <= ratios[currentLabelIndex]) {
+      
+        INDArray currentPlayground = stackedPlaygroundLabels.getFirst().getRow(totalIndex);
+        stackedPlaygrounds.putRow(stackedIndex, currentPlayground);
+  
+        stackedLabels.putRow(stackedIndex, currentLabel);
+        
+        stackedIndex++;
+      }
+    }
+
+    return new org.nd4j.linalg.dataset.DataSet(stackedPlaygrounds, stackedLabels);
   }
 
   public DataSet stackPlaygroundInputsLabels() {
@@ -80,7 +120,7 @@ public class FeedForwardCommon {
   public void evaluateNetworkPerformance(MultiLayerNetwork net, DataSet dataSet) {
 
     INDArray output = net.output(dataSet.getFeatures());
-    Evaluation eval = new Evaluation(COLUMN_NUMBER);
+    Evaluation eval = new Evaluation(COLUMN_COUNT);
     eval.eval(dataSet.getLabels(), output);
 
     if (logger.isInfoEnabled()) {

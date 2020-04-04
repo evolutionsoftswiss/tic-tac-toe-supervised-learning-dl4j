@@ -67,8 +67,8 @@ public class TicTacToeNeuralDataConverter {
       List<Pair<INDArray, INDArray>> adaptedPlaygroundsLabels) {
 
     int playgroundsLabelsSize = adaptedPlaygroundsLabels.size();
-    INDArray stackedPlaygrounds = Nd4j.zeros(playgroundsLabelsSize, COLUMN_NUMBER);
-    INDArray stackedLabels = Nd4j.zeros(playgroundsLabelsSize, COLUMN_NUMBER);
+    INDArray stackedPlaygrounds = Nd4j.zeros(playgroundsLabelsSize, COLUMN_COUNT);
+    INDArray stackedLabels = Nd4j.zeros(playgroundsLabelsSize, COLUMN_COUNT);
 
     for (int index = 0; index < playgroundsLabelsSize; index++) {
 
@@ -87,7 +87,7 @@ public class TicTacToeNeuralDataConverter {
 
     int playgroundsLabelsSize = adaptedPlaygroundsLabels.size();
     INDArray stackedPlaygrounds = Nd4j.zeros(playgroundsLabelsSize, IMAGE_CHANNELS, IMAGE_SIZE, IMAGE_SIZE);
-    INDArray stackedLabels = Nd4j.zeros(playgroundsLabelsSize, COLUMN_NUMBER);
+    INDArray stackedLabels = Nd4j.zeros(playgroundsLabelsSize, COLUMN_COUNT);
 
     for (int index = 0; index < playgroundsLabelsSize; index++) {
 
@@ -179,23 +179,23 @@ public class TicTacToeNeuralDataConverter {
     int numberOfDrawMoves = 0;
     int numberOfMaxWins = 0;
     int numberOfMinWins = 0;
-    for (int arrayIndex = 0; arrayIndex < COLUMN_NUMBER; arrayIndex++) {
+    for (int arrayIndex = 0; arrayIndex < COLUMN_COUNT; arrayIndex++) {
 
-      if (equalsEpsilon(currentPlayground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE,
+      if (equalsEpsilon(currentPlayground.getDouble(arrayIndex), EMPTY_FIELD_VALUE,
           DOUBLE_COMPARISON_EPSILON) &&
-          equalsEpsilon(currentResult.getDouble(0, arrayIndex), MINIMAX_DRAW_VALUE, DOUBLE_COMPARISON_EPSILON)) {
+          equalsEpsilon(currentResult.getDouble(arrayIndex), MINIMAX_DRAW_VALUE, DOUBLE_COMPARISON_EPSILON)) {
 
         numberOfDrawMoves++;
 
-      } else if (equalsEpsilon(currentPlayground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE,
+      } else if (equalsEpsilon(currentPlayground.getDouble(arrayIndex), EMPTY_FIELD_VALUE,
           DOUBLE_COMPARISON_EPSILON) &&
-          currentResult.getDouble(0, arrayIndex) >= SMALLEST_MAX_WIN) {
+          currentResult.getDouble(arrayIndex) >= SMALLEST_MAX_WIN) {
 
         numberOfMaxWins++;
 
       } else if (equalsEpsilon(currentPlayground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE,
           DOUBLE_COMPARISON_EPSILON) &&
-          currentResult.getDouble(0, arrayIndex) <= BIGGEST_MIN_WIN) {
+          currentResult.getDouble(arrayIndex) <= BIGGEST_MIN_WIN) {
 
         numberOfMinWins++;
       
@@ -237,21 +237,24 @@ public class TicTacToeNeuralDataConverter {
     double currentFastestMinWin = BIGGEST_MIN_WIN;
     int bestMaxIndex = -1;
     int bestMinIndex = -1;
-    for (int arrayIndex = 0; arrayIndex < COLUMN_NUMBER; arrayIndex++) {
+    for (int arrayIndex = 0; arrayIndex < COLUMN_COUNT; arrayIndex++) {
 
-      if (equalsEpsilon(currentPlayground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE,
+      double playgroundOccupation = currentPlayground.getDouble(arrayIndex);
+      double upcomingFieldResult = currentResult.getDouble(arrayIndex);
+      
+      if (equalsEpsilon(playgroundOccupation, EMPTY_FIELD_VALUE,
           DOUBLE_COMPARISON_EPSILON) &&
-          equalsEpsilon(currentResult.getDouble(0, arrayIndex), MINIMAX_DRAW_VALUE, DOUBLE_COMPARISON_EPSILON)) {
+          equalsEpsilon(upcomingFieldResult, MINIMAX_DRAW_VALUE, DOUBLE_COMPARISON_EPSILON)) {
 
         numberOfDrawMoves++;
 
-      } else if (equalsEpsilon(currentPlayground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE,
+      } else if (equalsEpsilon(playgroundOccupation, EMPTY_FIELD_VALUE,
           DOUBLE_COMPARISON_EPSILON) &&
-          SMALLEST_MAX_WIN <= currentResult.getDouble(0, arrayIndex)) {
+          SMALLEST_MAX_WIN <= upcomingFieldResult) {
 
         numberOfMaxWins++;
-        if (currentFastestMaxWin > currentResult.getDouble(0, arrayIndex)) {
-          currentFastestMaxWin = currentResult.getDouble(0, arrayIndex);
+        if (currentFastestMaxWin > upcomingFieldResult) {
+          currentFastestMaxWin = upcomingFieldResult;
           bestMaxIndex = arrayIndex;
         
         } else if (bestMaxIndex == -1) {
@@ -259,14 +262,14 @@ public class TicTacToeNeuralDataConverter {
           bestMaxIndex = arrayIndex;
         }
 
-      } else if (equalsEpsilon(currentPlayground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE,
+      } else if (equalsEpsilon(playgroundOccupation, EMPTY_FIELD_VALUE,
           DOUBLE_COMPARISON_EPSILON) &&
-          BIGGEST_MIN_WIN >= currentResult.getDouble(0, arrayIndex)) {
+          BIGGEST_MIN_WIN >= upcomingFieldResult) {
 
         numberOfMinWins++;
-        if (currentFastestMinWin < currentResult.getDouble(0, arrayIndex)) {
+        if (currentFastestMinWin < upcomingFieldResult) {
 
-          currentFastestMinWin = currentResult.getDouble(0, arrayIndex);
+          currentFastestMinWin = upcomingFieldResult;
           bestMinIndex = arrayIndex;
 
         } else if (bestMinIndex == -1) {
@@ -280,11 +283,11 @@ public class TicTacToeNeuralDataConverter {
 
     if (isMaxMove(currentPlayground) && numberOfMaxWins > 0) {
 
-      adaptedResult = Nd4j.zeros(1, COLUMN_NUMBER).putScalar(0, bestMaxIndex, NET_WIN); //handleMaxWinPosition(currentResult, numberOfMaxWins);
+      adaptedResult = Nd4j.zeros(COLUMN_COUNT).putScalar(bestMaxIndex, NET_WIN); //handleMaxWinPosition(currentResult, numberOfMaxWins);
 
     } else if (!isMaxMove(currentPlayground) && numberOfMinWins > 0) {
 
-      adaptedResult = Nd4j.zeros(1, COLUMN_NUMBER).putScalar(0, bestMinIndex, NET_WIN); //handleMinWinPosition(currentResult, numberOfMinWins);
+      adaptedResult = Nd4j.zeros(COLUMN_COUNT).putScalar(bestMinIndex, NET_WIN); //handleMinWinPosition(currentResult, numberOfMinWins);
 
     } else if (numberOfDrawMoves > 0) {
 
@@ -300,25 +303,25 @@ public class TicTacToeNeuralDataConverter {
 
   protected static INDArray handleMultiMaxWinPosition(INDArray currentResult, int maxWins) {
 
-    INDArray adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
     int winFieldsFound = 0;
     double fastestWinFieldValue = SMALLEST_MAX_WIN - DEPTH_ADVANTAGE;
     for (int arrayIndex = 0; arrayIndex < 9 && winFieldsFound < maxWins; arrayIndex++) {
 
-      double currentWinFieldValue = currentResult.getDouble(0, arrayIndex);
+      double currentWinFieldValue = currentResult.getDouble(arrayIndex);
 
       if (currentWinFieldValue > fastestWinFieldValue) {
 
         fastestWinFieldValue = currentWinFieldValue;
 
-        adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
-        adaptedResult.putScalar(0, arrayIndex, NET_WIN);
+        adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
+        adaptedResult.putScalar(arrayIndex, NET_WIN);
         winFieldsFound++;
 
       } else if (currentWinFieldValue > NET_DRAW && equalsEpsilon(currentWinFieldValue, fastestWinFieldValue, DOUBLE_COMPARISON_EPSILON) ) {
 
-        adaptedResult.putScalar(0, arrayIndex, NET_WIN);
+        adaptedResult.putScalar(arrayIndex, NET_WIN);
         winFieldsFound++;
       }
     }
@@ -334,20 +337,20 @@ public class TicTacToeNeuralDataConverter {
    */
   protected static INDArray handleMaxWinPosition(INDArray currentResult, int maxWins) {
 
-    INDArray adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
     int winFieldsFound = 0;
     double fastestWinFieldValue = SMALLEST_MAX_WIN - DEPTH_ADVANTAGE;
     for (int arrayIndex = 0; arrayIndex < 9 && winFieldsFound < maxWins; arrayIndex++) {
 
-      double currentWinFieldValue = currentResult.getDouble(0, arrayIndex);
+      double currentWinFieldValue = currentResult.getDouble(arrayIndex);
 
       if (currentWinFieldValue > fastestWinFieldValue) {
 
         fastestWinFieldValue = currentWinFieldValue;
 
-        adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
-        adaptedResult.putScalar(0, arrayIndex, NET_WIN);
+        adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
+        adaptedResult.putScalar(arrayIndex, NET_WIN);
 
         winFieldsFound++;
 
@@ -358,26 +361,26 @@ public class TicTacToeNeuralDataConverter {
 
   protected static INDArray handleMultiMinWinPosition(INDArray currentResult, int minWins) {
 
-    INDArray adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
     int winFieldsFound = 0;
     double fastestWinFieldValue = BIGGEST_MIN_WIN + DEPTH_ADVANTAGE;
     for (int arrayIndex = 0; arrayIndex < 9 && winFieldsFound < minWins; arrayIndex++) {
 
-      double currentWinFieldValue = currentResult.getDouble(0, arrayIndex);
+      double currentWinFieldValue = currentResult.getDouble(arrayIndex);
 
       if (currentWinFieldValue < fastestWinFieldValue) {
 
-        adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+        adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
         fastestWinFieldValue = currentWinFieldValue;
-        adaptedResult.putScalar(0, arrayIndex, NET_WIN);
+        adaptedResult.putScalar(arrayIndex, NET_WIN);
 
         winFieldsFound++;
 
       } else if (currentWinFieldValue < NET_DRAW && equalsEpsilon(currentWinFieldValue, fastestWinFieldValue, DOUBLE_COMPARISON_EPSILON) ) {
 
-        adaptedResult.putScalar(0, arrayIndex, NET_WIN);
+        adaptedResult.putScalar(arrayIndex, NET_WIN);
         winFieldsFound++;
       }
     }
@@ -393,17 +396,17 @@ public class TicTacToeNeuralDataConverter {
    */
   protected static INDArray handleMinWinPosition(INDArray currentResult, int minWins) {
 
-    INDArray adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
     int winFieldsFound = 0;
     double fastestWinFieldValue = BIGGEST_MIN_WIN + DEPTH_ADVANTAGE;
     for (int arrayIndex = 0; arrayIndex < 9 && winFieldsFound < minWins; arrayIndex++) {
 
-      double currentWinFieldValue = currentResult.getDouble(0, arrayIndex);
+      double currentWinFieldValue = currentResult.getDouble(arrayIndex);
 
       if (currentWinFieldValue < fastestWinFieldValue) {
 
-        adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+        adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
         fastestWinFieldValue = currentWinFieldValue;
         adaptedResult.putScalar(0, arrayIndex, NET_WIN);
@@ -417,14 +420,14 @@ public class TicTacToeNeuralDataConverter {
   protected static INDArray handleDrawPosition(INDArray currentPlayground, INDArray currentResult, int draws) {
 
     // Take the first field found leading to a draw
-    INDArray adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
     boolean drawFieldFound = false;
 
     for (int arrayIndex = 0; arrayIndex < 9 && !drawFieldFound; arrayIndex++) {
 
-      if (equalsEpsilon(currentPlayground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE,
+      if (equalsEpsilon(currentPlayground.getDouble(arrayIndex), EMPTY_FIELD_VALUE,
           DOUBLE_COMPARISON_EPSILON) &&
-          equalsEpsilon(currentResult.getDouble(0, arrayIndex), MINIMAX_DRAW_VALUE, DOUBLE_COMPARISON_EPSILON)) {
+          equalsEpsilon(currentResult.getDouble(arrayIndex), MINIMAX_DRAW_VALUE, DOUBLE_COMPARISON_EPSILON)) {
 
         drawFieldFound = true;
         adaptedResult.putScalar(0, arrayIndex, NET_DRAW);
@@ -436,15 +439,15 @@ public class TicTacToeNeuralDataConverter {
 
   protected static INDArray handleMultiDrawPosition(INDArray currentPlayground, INDArray currentResult, int draws) {
 
-    INDArray adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
     for (int arrayIndex = 0; arrayIndex < 9; arrayIndex++) {
 
-      if (equalsEpsilon(currentPlayground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE,
+      if (equalsEpsilon(currentPlayground.getDouble(arrayIndex), EMPTY_FIELD_VALUE,
           DOUBLE_COMPARISON_EPSILON) &&
-          equalsEpsilon(currentResult.getDouble(0, arrayIndex), MINIMAX_DRAW_VALUE, DOUBLE_COMPARISON_EPSILON)) {
+          equalsEpsilon(currentResult.getDouble(arrayIndex), MINIMAX_DRAW_VALUE, DOUBLE_COMPARISON_EPSILON)) {
 
-        adaptedResult.putScalar(0, arrayIndex, NET_DRAW);
+        adaptedResult.putScalar(arrayIndex, NET_DRAW);
       }
     }
 
@@ -455,11 +458,11 @@ public class TicTacToeNeuralDataConverter {
 
     // Take the first found empty field leading to loss
     boolean lossFieldFound = false;
-    INDArray adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
     for (int arrayIndex = 0; arrayIndex < 9 && !lossFieldFound; arrayIndex++) {
 
-      if (equalsEpsilon(currentPlayground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE,
+      if (equalsEpsilon(currentPlayground.getDouble(arrayIndex), EMPTY_FIELD_VALUE,
           DOUBLE_COMPARISON_EPSILON)) {
 
         lossFieldFound = true;
@@ -474,14 +477,14 @@ public class TicTacToeNeuralDataConverter {
 
     double lossValue = 1.0;
 
-    INDArray adaptedResult = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
     for (int arrayIndex = 0; arrayIndex < 9; arrayIndex++) {
 
-      if (equalsEpsilon(currentPlayground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE,
+      if (equalsEpsilon(currentPlayground.getDouble(arrayIndex), EMPTY_FIELD_VALUE,
           DOUBLE_COMPARISON_EPSILON)) {
 
-        adaptedResult.putScalar(0, arrayIndex, lossValue);
+        adaptedResult.putScalar(arrayIndex, lossValue);
       }
     }
 
