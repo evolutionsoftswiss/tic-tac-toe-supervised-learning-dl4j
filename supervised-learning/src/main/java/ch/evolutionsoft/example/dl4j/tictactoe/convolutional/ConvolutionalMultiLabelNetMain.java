@@ -167,7 +167,7 @@ public class ConvolutionalMultiLabelNetMain {
 
     return new ComputationGraphConfiguration.GraphBuilder(createGeneralConfiguration())
         .addInputs(DEFAULT_INPUT_LAYER_NAME)
-        .addLayer("cnn0", new ConvolutionLayer.Builder(1, 1)
+        .addLayer("cnn0", new ConvolutionLayer.Builder(2, 2)
             .stride(1, 1)
             .padding(0, 0)
             .nIn(IMAGE_CHANNELS)
@@ -177,7 +177,7 @@ public class ConvolutionalMultiLabelNetMain {
             .weightInit(WeightInit.RELU)
             .build(), DEFAULT_INPUT_LAYER_NAME)
         .addLayer("cnn1",
-            new ConvolutionLayer.Builder(1, 1)
+            new ConvolutionLayer.Builder(2, 2)
             .stride(1, 1)
             .padding(0, 0)
             .nIn(22)
@@ -187,7 +187,7 @@ public class ConvolutionalMultiLabelNetMain {
             .build(),
             "cnn0")
         .addLayer("cnn2",
-            new ConvolutionLayer.Builder(1, 1)
+            new ConvolutionLayer.Builder(2, 2)
             .stride(1, 1)
             .padding(0, 0)
             .nIn(22)

@@ -93,13 +93,13 @@ public class TicTacToeMiniMaxGenerator {
 
     }
 
-    INDArray currentResults = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray currentResults = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
     double currentValue = MIN_WIN;
-    for (int currentMove = 0; currentMove < COLUMN_NUMBER; currentMove++) {
+    for (int currentMove = 0; currentMove < COLUMN_COUNT; currentMove++) {
 
       if (currentPlayground.getDouble(currentMove) == 0) {
 
-        INDArray newPlayground = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+        INDArray newPlayground = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
         Nd4j.copy(currentPlayground, newPlayground);
 
         newPlayground.putScalar(0, currentMove, MAX_PLAYER);
@@ -133,13 +133,13 @@ public class TicTacToeMiniMaxGenerator {
 
     }
 
-    INDArray currentResults = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray currentResults = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
     double currentValue = MAX_WIN;
-    for (int currentMove = 0; currentMove < COLUMN_NUMBER; currentMove++) {
+    for (int currentMove = 0; currentMove < COLUMN_COUNT; currentMove++) {
 
       if (currentPlayground.getDouble(currentMove) == 0) {
 
-        INDArray newPlayground = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+        INDArray newPlayground = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
         Nd4j.copy(currentPlayground, newPlayground);
 
         newPlayground.putScalar(0, currentMove, MIN_PLAYER);
@@ -173,9 +173,9 @@ public class TicTacToeMiniMaxGenerator {
 
   protected INDArray createVector(double scalarValue) {
 
-    INDArray allDraw = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+    INDArray allDraw = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
-    for (int index = 0; index < COLUMN_NUMBER; index++) {
+    for (int index = 0; index < COLUMN_COUNT; index++) {
 
       allDraw.putScalar(0, index, scalarValue);
     }

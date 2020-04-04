@@ -22,9 +22,7 @@ import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.nn.conf.layers.ActivationLayer;
 import org.deeplearning4j.nn.conf.layers.BatchNormalization;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
-import org.deeplearning4j.nn.conf.layers.GlobalPoolingLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
-import org.deeplearning4j.nn.conf.layers.PoolingType;
 import org.deeplearning4j.nn.conf.layers.SeparableConvolution2D;
 import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
@@ -46,9 +44,9 @@ import ch.evolutionsoft.net.game.tictactoe.TicTacToeNeuralDataConverter;
 
 public class ConvolutionalNetMain {
 
-  public static final double CONVOLUTION_LEARNING_RATE = 0.02;
+  public static final double CONVOLUTION_LEARNING_RATE = 0.000000002;
 
-  public static final int CONVOLUTION_NUMBER_OF_EPOCHS = 20;
+  public static final int CONVOLUTION_NUMBER_OF_EPOCHS = 100;
 
   public static final int CNN_OUTPUT_CHANNELS = 3;
 
@@ -72,7 +70,7 @@ public class ConvolutionalNetMain {
   protected void evaluateNetwork(ComputationGraph graphNetwork, DataSet dataSet) {
 
     INDArray output = graphNetwork.outputSingle(dataSet.getFeatures());
-    Evaluation eval = new Evaluation(COLUMN_NUMBER);
+    Evaluation eval = new Evaluation(COLUMN_COUNT);
     eval.eval(dataSet.getLabels(), output);
 
     if (logger.isInfoEnabled()) {
@@ -205,8 +203,8 @@ public class ConvolutionalNetMain {
                 .convolutionMode(ConvolutionMode.Same).build(),
             "block2_sepconv2_bn")
         
-        .addVertex("add1", new ElementWiseVertex(ElementWiseVertex.Op.Add), "block2_pool", "residual1").
-
+        .addVertex("add1", new ElementWiseVertex(ElementWiseVertex.Op.Add), "block2_pool", "residual1")
+/*
         addLayer("block3_sepconv1",
             new SeparableConvolution2D.Builder(2, 2).nOut(32).hasBias(false).convolutionMode(ConvolutionMode.Same)
                 .build(),
@@ -219,13 +217,13 @@ public class ConvolutionalNetMain {
             "block3_sepconv1_act")
         .addLayer("block3_sepconv2_bn", new BatchNormalization(), "block3_sepconv2")
         .addLayer("block3_sepconv2_act", new ActivationLayer(Activation.RELU), "block3_sepconv2_bn")
-
-        .addLayer("avg_pool", new GlobalPoolingLayer.Builder(PoolingType.AVG).build(), "block3_sepconv2_act")
+*/
+        //addLayer("avg_pool", new GlobalPoolingLayer.Builder(PoolingType.AVG).build(), "add1")
         
         .addLayer(DEFAULT_OUTPUT_LAYER_NAME, new OutputLayer.Builder()
             .nOut(9)
             .activation(Activation.SOFTMAX)
-            .build(), "avg_pool")
+            .build(), "add1")
         .setOutputs(DEFAULT_OUTPUT_LAYER_NAME)
         .build();
   }

@@ -2,11 +2,18 @@ package ch.evolutionsoft.net.game;
 
 import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.ops.impl.indexaccum.IMax;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
@@ -15,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants;
 import ch.evolutionsoft.net.game.tictactoe.TicTacToeGameHelper;
 import ch.evolutionsoft.net.game.tictactoe.TicTacToeNeuralDataConverter;
+
+import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.*;
 
 public class NeuralDataHelper {
 
@@ -107,6 +116,43 @@ public class NeuralDataHelper {
 
     return Nd4j.readTxtString(NeuralDataHelper.class.getResourceAsStream(labelPath));
   }
+  
+  public static void writeLabelDirectories(List<Pair<INDArray, INDArray>> convertedPlaygroundsResults) {
+    
+    Path directoryPath = Paths.get("input");
+    
+    for (int label = 0; label < COLUMN_COUNT; label++) {
+      
+      Path labelDirectoryPath = Paths.get(directoryPath.toString(), String.valueOf(label));
+      try {
+        Files.createDirectory(labelDirectoryPath);
+      } catch (IOException ioe) {
+        logger.error("Directory not created.", ioe);
+      }
+    }
+    
+    for (int row = 0; row < convertedPlaygroundsResults.size(); row++) {
+      
+      INDArray currentPlayground = convertedPlaygroundsResults.get(row).getFirst();
+      INDArray currentLabel = convertedPlaygroundsResults.get(row).getSecond();
+      
+      int label = Nd4j.getExecutioner().execAndReturn(new IMax(currentLabel)).getFinalResult().intValue();
+      
+      Path labeledPlaygroundPath = Paths.get(directoryPath.toString(), String.valueOf(label), String.valueOf(row));
+      
+      String pl = String.valueOf(currentPlayground).substring(2);
+      
+      String output = pl.substring(0, pl.length() - 2) + "," + label;
+      
+      try (PrintWriter writer = new PrintWriter(labeledPlaygroundPath.toString())) {
+        
+        writer.write(output);
+        writer.flush();
+      } catch (FileNotFoundException fnfe) {
+        logger.error("Output File path not found.", fnfe);
+      }
+    }
+  }
 
   public static void writeData(List<Pair<INDArray, INDArray>> allPlaygroundsResults) {
 
@@ -147,5 +193,4 @@ public class NeuralDataHelper {
     Nd4j.writeTxt(stackedMinPlaygroundsLabels.getSecond(), "labelsMin.txt");
 
   }
-
 }
