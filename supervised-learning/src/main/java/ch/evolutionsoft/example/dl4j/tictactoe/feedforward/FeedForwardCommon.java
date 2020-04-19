@@ -31,6 +31,8 @@ public class FeedForwardCommon {
 
   private static final Logger logger = LoggerFactory.getLogger(FeedForwardCommon.class);
 
+  private static final int NUMBER_OF_EPOCHS = 2000;
+
   public static String INPUTS_PATH = "/inputs.txt";
   public static String LABELS_PATH = "/labels.txt";
 
@@ -52,17 +54,21 @@ public class FeedForwardCommon {
 
     List<Pair<INDArray, INDArray>> allPlaygrounds = NeuralDataHelper.readAll(INPUTS_PATH, LABELS_PATH);
     List<Pair<INDArray, INDArray>> convertedMiniMaxLabels = TicTacToeNeuralDataConverter.convertMiniMaxLabels(allPlaygrounds);
-    
-    List<Pair<INDArray, INDArray>> printExamples = NeuralDataHelper.printRandomFeedForwardNetInputAndLabels(
+
+    NeuralDataHelper.printRandomMiniMaxData(allPlaygrounds, DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG);
+    NeuralDataHelper.printRandomFeedForwardNetInputAndLabels(
         convertedMiniMaxLabels, DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG);
-    NeuralDataHelper.printRandomMiniMaxData(printExamples, DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG);
     
     net.addListeners(new ScoreIterationListener(DEFAULT_NUMBER_OF_PRINT_EPOCHS));
     
-    for (int epochNumber = 0; epochNumber < DEFAULT_NUMBER_OF_EPOCHS; epochNumber++) {
+    for (int epochNumber = 0; epochNumber < NUMBER_OF_EPOCHS; epochNumber++) {
       
       DataSet randomBalancedDataSet = getTrainDataSetWithMaxLabelExampleSize(convertedMiniMaxLabels);
-      
+      /*DataSet dataSet = new org.nd4j.linalg.dataset.DataSet(
+          stackedPlaygrounds.getFirst(),
+          stackedPlaygrounds.getSecond()
+          );
+      */
       net.fit(randomBalancedDataSet);
     }
   }
@@ -87,7 +93,7 @@ public class FeedForwardCommon {
         minOccurance / labelStatistics[3],minOccurance / labelStatistics[4],minOccurance / labelStatistics[5],
         minOccurance / labelStatistics[6],minOccurance / labelStatistics[7],minOccurance / labelStatistics[8]};
     
-    for (int totalIndex = 0, stackedIndex = 0; stackedIndex < stackedSize; totalIndex++) {
+    for (int totalIndex = 0, stackedIndex = 0; stackedIndex < stackedSize && totalIndex < 4520; totalIndex++) {
 
       INDArray currentLabel = stackedPlaygroundLabels.getSecond().getRow(totalIndex);
       int currentLabelIndex = Nd4j.getExecutioner().execAndReturn(new IMax(currentLabel)).getFinalResult().intValue();
@@ -135,7 +141,7 @@ public class FeedForwardCommon {
       DataSetIterator dataSetIterator) {
 
     return new EarlyStoppingConfiguration.Builder<MultiLayerNetwork>()
-        .epochTerminationConditions(new MaxEpochsTerminationCondition(DEFAULT_NUMBER_OF_EPOCHS))
+        .epochTerminationConditions(new MaxEpochsTerminationCondition(NUMBER_OF_EPOCHS))
         .iterationTerminationConditions(new MaxScoreIterationTerminationCondition(DEFAULT_MAX_SCORE_EARLY_STOP))
         .scoreCalculator(new DataSetLossCalculator(dataSetIterator, true))
         .evaluateEveryNEpochs(50)

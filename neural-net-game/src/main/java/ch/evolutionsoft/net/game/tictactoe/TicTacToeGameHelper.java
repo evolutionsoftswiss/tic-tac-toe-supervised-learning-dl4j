@@ -88,7 +88,7 @@ public class TicTacToeGameHelper {
     int countStones = 0;
     for (int arrayIndex = 0; arrayIndex < COLUMN_COUNT; arrayIndex++) {
 
-      if (!equalsEpsilon(playground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE, DOUBLE_COMPARISON_EPSILON)) {
+      if (!equalsEpsilon(playground.getDouble(arrayIndex), EMPTY_FIELD_VALUE, DOUBLE_COMPARISON_EPSILON)) {
 
         countStones++;
       }

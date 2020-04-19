@@ -34,6 +34,8 @@ public class TicTacToeMiniMaxGenerator {
   protected boolean keepDuplicates = false;
 
   protected List<Pair<INDArray, INDArray>> allPlaygroundsResults = new ArrayList<>();
+  
+  protected int bestFoundSearchMove = -1;
 
   public static void main(String[] arguments) {
 
@@ -53,6 +55,50 @@ public class TicTacToeMiniMaxGenerator {
   public void searchInitial() {
 
     this.max(EMPTY_PLAYGROUND, 0);
+  }
+
+  public int searchCurrent(INDArray currentPlayground) {
+
+    double currentPlayer = TicTacToeGameHelper.getCurrentPlayer(currentPlayground);
+    
+    int fieldsOccupied = TicTacToeGameHelper.countStones(currentPlayground);
+    
+    if (currentPlayer == MAX_PLAYER) {
+      
+      int currentValue = Integer.MIN_VALUE;
+      for (int currentMove : TicTacToeGameHelper.getEmptyFields(currentPlayground)) {
+        
+        INDArray newPlayground = performMove(currentPlayground, currentMove, currentPlayer);
+        
+        int newValue = searchMin(newPlayground, Integer.MIN_VALUE, Integer.MAX_VALUE, fieldsOccupied + 1);
+        
+        if (newValue > currentValue) {
+          
+          currentValue = newValue;
+          this.bestFoundSearchMove = currentMove;
+        }
+      }
+      
+      return currentValue;
+
+    } else {
+
+      int currentValue = Integer.MAX_VALUE;
+      for (int currentMove : TicTacToeGameHelper.getEmptyFields(currentPlayground)) {
+        
+        INDArray newPlayground = performMove(currentPlayground, currentMove, currentPlayer);
+        
+        int newValue = searchMax(newPlayground, Integer.MIN_VALUE, Integer.MAX_VALUE, fieldsOccupied + 1);
+        
+        if (newValue < currentValue) {
+          
+          currentValue = newValue;
+          this.bestFoundSearchMove = currentMove;
+        }
+      }
+      
+      return currentValue;
+    }
   }
 
   public List<Pair<INDArray, INDArray>> removeDuplicates() {
@@ -79,6 +125,85 @@ public class TicTacToeMiniMaxGenerator {
   public List<Pair<INDArray, INDArray>> getGeneratedPlaygroundsLabels() {
 
     return allPlaygroundsResults;
+  }
+
+  public int searchMax(INDArray currentPlayground, int alpha, int beta, int depth) {
+
+    if (TicTacToeGameHelper.hasWon(currentPlayground, MIN_PLAYER)) {
+
+      return MIN_WIN + depth;
+
+    } else if (TicTacToeGameHelper.noEmptyFieldsLeft(currentPlayground)) {
+
+      return MINIMAX_DRAW_VALUE;
+
+    }
+
+    int currentValue = MIN_WIN;
+    for (int currentMove = 0; currentMove < COLUMN_COUNT; currentMove++) {
+
+      if (currentPlayground.getDouble(currentMove) == 0) {
+
+        INDArray newPlayground = performMove(currentPlayground, currentMove, MAX_PLAYER);
+
+        currentValue = Math.max(currentValue, searchMin(newPlayground, alpha, beta, depth + 1));
+
+        if (currentValue > beta) {
+            return currentValue;
+        }
+
+        alpha = Math.max(alpha, currentValue);
+      }
+
+    }
+
+    return currentValue;
+  }
+
+  public int searchMin(INDArray currentPlayground, int alpha, int beta, int depth) {
+
+    if (TicTacToeGameHelper.hasWon(currentPlayground, MAX_PLAYER)) {
+
+      return MAX_WIN - depth;
+
+    } else if (TicTacToeGameHelper.noEmptyFieldsLeft(currentPlayground)) {
+
+      return MINIMAX_DRAW_VALUE;
+
+    }
+
+    int currentValue = MAX_WIN;
+    for (int currentMove = 0; currentMove < COLUMN_COUNT; currentMove++) {
+
+      if (currentPlayground.getDouble(currentMove) == 0) {
+
+        INDArray newPlayground = performMove(currentPlayground, currentMove, MIN_PLAYER);
+
+        currentValue = Math.min(currentValue, searchMax(newPlayground, alpha, beta, depth + 1));
+        
+        if (currentValue < alpha) {
+             return currentValue;
+        }
+      
+        beta = Math.min(currentValue, beta);
+      }
+    }
+
+    return currentValue;
+  }
+
+  public int getBestFoundSearchMove() {
+
+    return bestFoundSearchMove;
+  }
+
+  protected INDArray performMove(INDArray currentPlayground, int currentMove, double currentPlayer) {
+
+    INDArray newPlayground = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
+    Nd4j.copy(currentPlayground, newPlayground);
+
+    newPlayground.putScalar(0, currentMove, currentPlayer);
+    return newPlayground;
   }
 
   protected double max(INDArray currentPlayground, int depth) {

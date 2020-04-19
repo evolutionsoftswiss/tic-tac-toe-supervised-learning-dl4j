@@ -8,11 +8,9 @@ public final class NeuralNetConstants {
     // Hide constructor
   }
 
-  public static final Integer DEFAULT_SEED = 2357;
+  public static final Integer DEFAULT_SEED = 235711;
 
   public static final Random randomGenerator = new Random(DEFAULT_SEED);
-
-  public static final int DEFAULT_NUMBER_OF_EPOCHS = 2000;
   
   public static final int DEFAULT_NUMBER_OF_PRINT_EPOCHS = 20;
 
@@ -22,7 +20,7 @@ public final class NeuralNetConstants {
   
   public static final int MEDIUM_CAPACITY = 5000;
 
-  public static final int DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG = 1;
+  public static final int DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG = 2;
 
   public static final String DEFAULT_INPUT_LAYER_NAME = "InputLayer";
   public static final String DEFAULT_HIDDEN_LAYER_NAME = "HiddenLayer";

@@ -3,8 +3,6 @@ package ch.evolutionsoft.net.game.tictactoe;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import ch.evolutionsoft.net.game.NeuralNetConstants;
-
 public final class TicTacToeConstants {
 
   private TicTacToeConstants() {
@@ -77,20 +75,20 @@ public final class TicTacToeConstants {
    * Result labels interpretation. MAX_WIN - 9 > DRAW_VALUE > MIN_WIN + 9 for
    * MiniMax comparison. Any occupied playground field leads to a zero result.
    */
-  public static final double MAX_WIN = 10;
-  public static final double MIN_WIN = -10;
+  public static final int MAX_WIN = 10;
+  public static final int MIN_WIN = -10;
   public static final int DEPTH_ADVANTAGE = 1;
-  public static final double MINIMAX_DRAW_VALUE = 0;
+  public static final int MINIMAX_DRAW_VALUE = 0;
   public static final double OCCUPIED = 0;
 
   /**
    * Result labels for neural nets 0 corresponds to a field that we don't want to play
-   * 1 to a field that we want to play, leading to at least a draw from the current
+   * 1 to a field that we want to play, leading to all possible results from the current
    * player perspective.
    */
   public static final double NET_WIN = 1.0;
   public static final double NET_DRAW = 1.0;
-  public static final double NET_LOSS = NeuralNetConstants.ZERO;
+  public static final double NET_LOSS = 1.0;
   
   public static final int SMALL_CAPACITY = 10;
 }
