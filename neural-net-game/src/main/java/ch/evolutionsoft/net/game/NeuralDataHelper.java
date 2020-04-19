@@ -27,6 +27,7 @@ import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.*;
 
 public class NeuralDataHelper {
 
+  public static final String LOG_PLACEHOLDER = "{}";
   public static final String IND_ARRAY_VALUE_SEPARATOR = ":";
   public static final String INPUT = "Example Neural Net Input";
   public static final String LABEL = " Label=";
@@ -72,7 +73,9 @@ public class NeuralDataHelper {
       
       chosenExamples.add(new Pair<>(currentInput, currentLabel));
       
-      logger.info(INPUT + currentInput + LABEL + currentLabel);
+      logger.info(INPUT + LOG_PLACEHOLDER + LABEL + LOG_PLACEHOLDER,
+          currentInput,
+          currentLabel);
     }
     
     return chosenExamples;
@@ -87,8 +90,9 @@ public class NeuralDataHelper {
 
       int randomRow = randomGenerator.nextInt(numberOfInputsLables);
 
-      logger.info(INPUT + NEW_LINE + adaptedFetauresLabels.get(randomRow).getFirst() + NEW_LINE + LABEL +
-                  adaptedFetauresLabels.get(randomRow).getSecond());
+      logger.info(INPUT + NEW_LINE + LOG_PLACEHOLDER + NEW_LINE + LABEL + LOG_PLACEHOLDER,
+          adaptedFetauresLabels.get(randomRow).getFirst(),
+          adaptedFetauresLabels.get(randomRow).getSecond());
     }
   }
 

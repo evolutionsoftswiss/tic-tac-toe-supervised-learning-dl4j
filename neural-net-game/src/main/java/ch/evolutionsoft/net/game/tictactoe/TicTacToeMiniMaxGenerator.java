@@ -206,7 +206,7 @@ public class TicTacToeMiniMaxGenerator {
     return newPlayground;
   }
 
-  protected double max(INDArray currentPlayground, int depth) {
+  protected int max(INDArray currentPlayground, int depth) {
 
     if (TicTacToeGameHelper.hasWon(currentPlayground, MIN_PLAYER)) {
 
@@ -219,7 +219,7 @@ public class TicTacToeMiniMaxGenerator {
     }
 
     INDArray currentResults = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
-    double currentValue = MIN_WIN;
+    int currentValue = MIN_WIN;
     for (int currentMove = 0; currentMove < COLUMN_COUNT; currentMove++) {
 
       if (currentPlayground.getDouble(currentMove) == 0) {
@@ -246,7 +246,7 @@ public class TicTacToeMiniMaxGenerator {
 
   }
 
-  protected double min(INDArray currentPlayground, int depth) {
+  protected int min(INDArray currentPlayground, int depth) {
 
     if (TicTacToeGameHelper.hasWon(currentPlayground, MAX_PLAYER)) {
 
@@ -259,7 +259,7 @@ public class TicTacToeMiniMaxGenerator {
     }
 
     INDArray currentResults = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
-    double currentValue = MAX_WIN;
+    int currentValue = MAX_WIN;
     for (int currentMove = 0; currentMove < COLUMN_COUNT; currentMove++) {
 
       if (currentPlayground.getDouble(currentMove) == 0) {

@@ -214,15 +214,15 @@ public class TicTacToeNeuralDataConverter {
 
     } else if (numberOfDrawMoves > 0) {
 
-      adaptedResult = handleMultiDrawPosition(currentPlayground, currentResult, numberOfDrawMoves);
+      adaptedResult = handleMultiDrawPosition(currentPlayground, currentResult);
 
     } else if (isMaxMove(currentPlayground) && numberOfMinWins > 0) {
 
-      adaptedResult = handleMultiLossPosition(currentPlayground, currentResult, numberOfMinWins);
+      adaptedResult = handleMultiLossPosition(currentPlayground);
     
     } else if (!isMaxMove(currentPlayground) && numberOfMaxWins > 0) {
 
-      adaptedResult = handleMultiLossPosition(currentPlayground, currentResult, numberOfMaxWins);
+      adaptedResult = handleMultiLossPosition(currentPlayground);
     }
 
     return adaptedResult;
@@ -283,15 +283,15 @@ public class TicTacToeNeuralDataConverter {
 
     if (isMaxMove(currentPlayground) && numberOfMaxWins > 0) {
 
-      adaptedResult = Nd4j.zeros(COLUMN_COUNT).putScalar(bestMaxIndex, NET_WIN); //handleMaxWinPosition(currentResult, numberOfMaxWins);
+      adaptedResult = Nd4j.zeros(COLUMN_COUNT).putScalar(bestMaxIndex, NET_WIN);
 
     } else if (!isMaxMove(currentPlayground) && numberOfMinWins > 0) {
 
-      adaptedResult = Nd4j.zeros(COLUMN_COUNT).putScalar(bestMinIndex, NET_WIN); //handleMinWinPosition(currentResult, numberOfMinWins);
+      adaptedResult = Nd4j.zeros(COLUMN_COUNT).putScalar(bestMinIndex, NET_WIN);
 
     } else if (numberOfDrawMoves > 0) {
 
-      adaptedResult = handleDrawPosition(currentPlayground, currentResult, numberOfDrawMoves);
+      adaptedResult = handleDrawPosition(currentPlayground, currentResult);
 
     } else {
       
@@ -328,37 +328,6 @@ public class TicTacToeNeuralDataConverter {
     return adaptedResult;
   }
 
-  /**
-   * Creates a binary output by taking the first found MAX win move
-   * 
-   * @param currentResult
-   * @param maxWins
-   * @return
-   */
-  protected static INDArray handleMaxWinPosition(INDArray currentResult, int maxWins) {
-
-    INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
-
-    int winFieldsFound = 0;
-    double fastestWinFieldValue = SMALLEST_MAX_WIN - DEPTH_ADVANTAGE;
-    for (int arrayIndex = 0; arrayIndex < 9 && winFieldsFound < maxWins; arrayIndex++) {
-
-      double currentWinFieldValue = currentResult.getDouble(arrayIndex);
-
-      if (currentWinFieldValue > fastestWinFieldValue) {
-
-        fastestWinFieldValue = currentWinFieldValue;
-
-        adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
-        adaptedResult.putScalar(arrayIndex, NET_WIN);
-
-        winFieldsFound++;
-
-      }
-    }
-    return adaptedResult;
-  }
-
   protected static INDArray handleMultiMinWinPosition(INDArray currentResult, int minWins) {
 
     INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
@@ -387,37 +356,7 @@ public class TicTacToeNeuralDataConverter {
     return adaptedResult;
   }
 
-  /**
-   * Creates a binary output by taking the first found fastest MIN win move
-   * 
-   * @param currentResult
-   * @param minWins
-   * @return
-   */
-  protected static INDArray handleMinWinPosition(INDArray currentResult, int minWins) {
-
-    INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
-
-    int winFieldsFound = 0;
-    double fastestWinFieldValue = BIGGEST_MIN_WIN + DEPTH_ADVANTAGE;
-    for (int arrayIndex = 0; arrayIndex < 9 && winFieldsFound < minWins; arrayIndex++) {
-
-      double currentWinFieldValue = currentResult.getDouble(arrayIndex);
-
-      if (currentWinFieldValue < fastestWinFieldValue) {
-
-        adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
-
-        fastestWinFieldValue = currentWinFieldValue;
-        adaptedResult.putScalar(0, arrayIndex, NET_WIN);
-
-        winFieldsFound++;
-      }
-    }
-    return adaptedResult;
-  }
-
-  protected static INDArray handleDrawPosition(INDArray currentPlayground, INDArray currentResult, int draws) {
+  protected static INDArray handleDrawPosition(INDArray currentPlayground, INDArray currentResult) {
 
     // Take the first field found leading to a draw
     INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
@@ -437,7 +376,7 @@ public class TicTacToeNeuralDataConverter {
     return adaptedResult;
   }
 
-  protected static INDArray handleMultiDrawPosition(INDArray currentPlayground, INDArray currentResult, int draws) {
+  protected static INDArray handleMultiDrawPosition(INDArray currentPlayground, INDArray currentResult) {
 
     INDArray adaptedResult = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
@@ -473,7 +412,7 @@ public class TicTacToeNeuralDataConverter {
     return adaptedResult;
   }
 
-  protected static INDArray handleMultiLossPosition(INDArray currentPlayground, INDArray currentResult, int losses) {
+  protected static INDArray handleMultiLossPosition(INDArray currentPlayground) {
 
     double lossValue = 1.0;
 

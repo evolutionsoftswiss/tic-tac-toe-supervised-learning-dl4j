@@ -2,9 +2,6 @@ package ch.evolutionsoft.example.dl4j.tictactoe.feedforward;
 
 import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
@@ -26,7 +23,7 @@ public class FeedForwardFourLayerMain {
 
   private static final Logger logger = LoggerFactory.getLogger(FeedForwardFourLayerMain.class);
 
-  public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
+  public static void main(String[] args) {
 
     FeedForwardFourLayerMain hiddenLayerSetup = new FeedForwardFourLayerMain();
 

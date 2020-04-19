@@ -9,6 +9,10 @@ import java.util.List;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class TicTacToeGameHelper {
+  
+  private TicTacToeGameHelper() {
+    // Hide constructor
+  }
 
   public static List<Integer> getEmptyFields(INDArray actualPlayGround) {
 

@@ -3,7 +3,6 @@ package ch.evolutionsoft.example.dl4j.tictactoe.feedforward;
 import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
 import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.*;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
@@ -33,8 +32,8 @@ public class FeedForwardCommon {
 
   private static final int NUMBER_OF_EPOCHS = 2000;
 
-  public static String INPUTS_PATH = "/inputs.txt";
-  public static String LABELS_PATH = "/labels.txt";
+  public static final String INPUTS_PATH = "/inputs.txt";
+  public static final String LABELS_PATH = "/labels.txt";
 
   public MultiLayerNetwork createNetworkModel(MultiLayerConfiguration multiLayerConfiguration) {
 
@@ -47,7 +46,7 @@ public class FeedForwardCommon {
     return net;
   }
 
-  public void trainNetworkModel(MultiLayerNetwork net) throws IOException {
+  public void trainNetworkModel(MultiLayerNetwork net) {
 
     String message = "Generate adapted net input and labels ...";
     logger.info(message);
@@ -64,11 +63,7 @@ public class FeedForwardCommon {
     for (int epochNumber = 0; epochNumber < NUMBER_OF_EPOCHS; epochNumber++) {
       
       DataSet randomBalancedDataSet = getTrainDataSetWithMaxLabelExampleSize(convertedMiniMaxLabels);
-      /*DataSet dataSet = new org.nd4j.linalg.dataset.DataSet(
-          stackedPlaygrounds.getFirst(),
-          stackedPlaygrounds.getSecond()
-          );
-      */
+
       net.fit(randomBalancedDataSet);
     }
   }
@@ -78,7 +73,7 @@ public class FeedForwardCommon {
     Pair<INDArray, INDArray> stackedPlaygroundLabels =
         TicTacToeNeuralDataConverter.stackFeedForwardPlaygroundLabels(convertedMiniMaxLabels);
     
-    //labelStatistics1 = new int[] {1449, 421, 581, 313, 618, 227, 360, 170, 318}
+    //label Statistics distribution is (1449, 421, 581, 313, 618, 227, 360, 170, 318)
     INDArray labelStatisticsNdArray = stackedPlaygroundLabels.getSecond().sum(0);
     
     double[] labelStatistics = labelStatisticsNdArray.toDoubleVector();
@@ -93,7 +88,8 @@ public class FeedForwardCommon {
         minOccurance / labelStatistics[3],minOccurance / labelStatistics[4],minOccurance / labelStatistics[5],
         minOccurance / labelStatistics[6],minOccurance / labelStatistics[7],minOccurance / labelStatistics[8]};
     
-    for (int totalIndex = 0, stackedIndex = 0; stackedIndex < stackedSize && totalIndex < 4520; totalIndex++) {
+    int stackedIndex = 0;
+    for (int totalIndex = 0; stackedIndex < stackedSize && totalIndex < 4520; totalIndex++) {
 
       INDArray currentLabel = stackedPlaygroundLabels.getSecond().getRow(totalIndex);
       int currentLabelIndex = Nd4j.getExecutioner().execAndReturn(new IMax(currentLabel)).getFinalResult().intValue();

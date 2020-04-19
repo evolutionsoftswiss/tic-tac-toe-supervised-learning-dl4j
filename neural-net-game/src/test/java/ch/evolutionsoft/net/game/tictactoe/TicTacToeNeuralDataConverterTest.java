@@ -35,8 +35,8 @@ public class TicTacToeNeuralDataConverterTest {
     List<Pair<INDArray, INDArray>> convertedPairList = TicTacToeNeuralDataConverter.convertMiniMaxLabels(testSingleList);
     INDArray convertedResult = convertedPairList.get(0).getSecond();
     
-    assertEquals(convertedResult.getDouble(FIELD_4), NET_LOSS);
-    assertEquals(convertedResult.getDouble(FIELD_9), NET_WIN);
+    assertEquals(NET_LOSS, convertedResult.getDouble(FIELD_4));
+    assertEquals(NET_WIN, convertedResult.getDouble(FIELD_9));
   }
 
   @Test
