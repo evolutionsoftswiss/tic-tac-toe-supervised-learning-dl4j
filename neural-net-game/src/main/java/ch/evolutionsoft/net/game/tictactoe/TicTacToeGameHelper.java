@@ -9,11 +9,15 @@ import java.util.List;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class TicTacToeGameHelper {
+  
+  private TicTacToeGameHelper() {
+    // Hide constructor
+  }
 
   public static List<Integer> getEmptyFields(INDArray actualPlayGround) {
 
     List<Integer> emptyFields = new LinkedList<>();
-    for (int index = 0; index < COLUMN_NUMBER; index++) {
+    for (int index = 0; index < COLUMN_COUNT; index++) {
 
       if (actualPlayGround.getInt(index) == 0) {
 
@@ -26,7 +30,7 @@ public class TicTacToeGameHelper {
 
   public static boolean noEmptyFieldsLeft(INDArray actualPlayGround) {
 
-    for (int index = 0; index < COLUMN_NUMBER; index++) {
+    for (int index = 0; index < COLUMN_COUNT; index++) {
 
       double currentField = actualPlayGround.getDouble(index);
       if (isEmpty(currentField)) {
@@ -40,7 +44,7 @@ public class TicTacToeGameHelper {
 
   public static boolean allFieldsEmpty(INDArray actualPlayGround) {
 
-    for (int index = 0; index < COLUMN_NUMBER; index++) {
+    for (int index = 0; index < COLUMN_COUNT; index++) {
 
       double currentField = actualPlayGround.getDouble(index);
       if (!isEmpty(currentField)) {
@@ -86,9 +90,9 @@ public class TicTacToeGameHelper {
   public static int countStones(INDArray playground) {
 
     int countStones = 0;
-    for (int arrayIndex = 0; arrayIndex < COLUMN_NUMBER; arrayIndex++) {
+    for (int arrayIndex = 0; arrayIndex < COLUMN_COUNT; arrayIndex++) {
 
-      if (!equalsEpsilon(playground.getDouble(0, arrayIndex), EMPTY_FIELD_VALUE, DOUBLE_COMPARISON_EPSILON)) {
+      if (!equalsEpsilon(playground.getDouble(arrayIndex), EMPTY_FIELD_VALUE, DOUBLE_COMPARISON_EPSILON)) {
 
         countStones++;
       }
@@ -99,7 +103,7 @@ public class TicTacToeGameHelper {
   public static int countMaxStones(INDArray playground) {
 
     int countMaxStones = 0;
-    for (int arrayIndex = 0; arrayIndex < COLUMN_NUMBER; arrayIndex++) {
+    for (int arrayIndex = 0; arrayIndex < COLUMN_COUNT; arrayIndex++) {
 
       if (equalsEpsilon(playground.getDouble(0, arrayIndex), MAX_PLAYER, DOUBLE_COMPARISON_EPSILON)) {
 
@@ -112,7 +116,7 @@ public class TicTacToeGameHelper {
   public static int countMinStones(INDArray playground) {
 
     int countMinStones = 0;
-    for (int arrayIndex = 0; arrayIndex < COLUMN_NUMBER; arrayIndex++) {
+    for (int arrayIndex = 0; arrayIndex < COLUMN_COUNT; arrayIndex++) {
 
       if (equalsEpsilon(playground.getDouble(0, arrayIndex), MIN_PLAYER, DOUBLE_COMPARISON_EPSILON)) {
 
@@ -126,7 +130,7 @@ public class TicTacToeGameHelper {
     
     INDArray invertedPlayground = playground.dup();
 
-    for (int arrayIndex = 0; arrayIndex < COLUMN_NUMBER; arrayIndex++) {
+    for (int arrayIndex = 0; arrayIndex < COLUMN_COUNT; arrayIndex++) {
 
       if (equalsEpsilon(playground.getDouble(0, arrayIndex), MIN_PLAYER, DOUBLE_COMPARISON_EPSILON)) {
 

@@ -2,8 +2,6 @@ package ch.evolutionsoft.example.dl4j.tictactoe.feedforward;
 
 import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
 
-import java.io.IOException;
-
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
@@ -17,23 +15,22 @@ import org.slf4j.LoggerFactory;
 
 import ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants;
 
-public class FeedForwardTwoLayerMain {
+public class FeedForwardFourLayerMain {
 
-  private static final int NUMBER_OF_NODES = 141;
+  private static final int HIDDEN_LAYER_NUMBER_OF_NODES = 32;
 
-  private static final Logger logger = LoggerFactory.getLogger(FeedForwardTwoLayerMain.class);
+  private static final double LEARNING_RATE = 0.12;
 
-  private static final double LEARNING_RATE = 1;
+  private static final Logger logger = LoggerFactory.getLogger(FeedForwardFourLayerMain.class);
 
-  private static final double NESTEROVS_MOMENTUM = 0.99;
+  public static void main(String[] args) {
 
-  public static void main(String[] args) throws IOException {
-
-    FeedForwardTwoLayerMain twoLayerSetup = new FeedForwardTwoLayerMain();
+    FeedForwardFourLayerMain hiddenLayerSetup = new FeedForwardFourLayerMain();
 
     FeedForwardCommon feedForwardCommon = new FeedForwardCommon();
     MultiLayerNetwork net = feedForwardCommon.createNetworkModel(
-        twoLayerSetup.createTwoLayerConfiguration(twoLayerSetup.createGeneralConfiguration()).build());
+        hiddenLayerSetup.createHiddenLayerConfiguration(hiddenLayerSetup.createGeneralConfiguration())
+        .build());
 
     if (logger.isInfoEnabled()) {
       logger.info(net.summary());
@@ -50,22 +47,37 @@ public class FeedForwardTwoLayerMain {
         .seed(DEFAULT_SEED)
         .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
         .weightInit(WeightInit.XAVIER)
-        .updater(new Nesterovs(LEARNING_RATE, NESTEROVS_MOMENTUM));
+        .updater(new Nesterovs(LEARNING_RATE, 0.9));
   }
 
-  public NeuralNetConfiguration.ListBuilder createTwoLayerConfiguration(
+  public NeuralNetConfiguration.ListBuilder createHiddenLayerConfiguration(
       NeuralNetConfiguration.Builder generalConfigBuilder) {
 
     return new NeuralNetConfiguration.ListBuilder(generalConfigBuilder)
         .layer(0, new DenseLayer.Builder()
             .activation(Activation.TANH)
-            .nIn(TicTacToeConstants.COLUMN_NUMBER)
-            .nOut(NUMBER_OF_NODES)
+            .nIn(TicTacToeConstants.COLUMN_COUNT)
+            .nOut(HIDDEN_LAYER_NUMBER_OF_NODES)
+            .name(DEFAULT_INPUT_LAYER_NAME)
             .build())
-        .layer(1, new OutputLayer.Builder()
+        .layer(1, new DenseLayer.Builder()
+            .activation(Activation.TANH)
+            .nIn(HIDDEN_LAYER_NUMBER_OF_NODES)
+            .nOut(HIDDEN_LAYER_NUMBER_OF_NODES)
+            .name(DEFAULT_HIDDEN_LAYER_NAME + "1")
+            .build())
+        .layer(2, new DenseLayer.Builder()
+            .activation(Activation.TANH)
+            .nIn(HIDDEN_LAYER_NUMBER_OF_NODES)
+            .nOut(HIDDEN_LAYER_NUMBER_OF_NODES)
+            .name(DEFAULT_HIDDEN_LAYER_NAME + "2")
+            .build())
+        .layer(3, new OutputLayer.Builder()
             .activation(Activation.SOFTMAX)
-            .nIn(NUMBER_OF_NODES)
-            .nOut(TicTacToeConstants.COLUMN_NUMBER)
+            .nIn(HIDDEN_LAYER_NUMBER_OF_NODES)
+            .nOut(TicTacToeConstants.COLUMN_COUNT)
+            .name(DEFAULT_OUTPUT_LAYER_NAME)
             .build());
-  }
+    }
+
 }

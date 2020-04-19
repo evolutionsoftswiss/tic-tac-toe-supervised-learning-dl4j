@@ -2,11 +2,18 @@ package ch.evolutionsoft.net.game;
 
 import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.ops.impl.indexaccum.IMax;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
@@ -16,8 +23,11 @@ import ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants;
 import ch.evolutionsoft.net.game.tictactoe.TicTacToeGameHelper;
 import ch.evolutionsoft.net.game.tictactoe.TicTacToeNeuralDataConverter;
 
+import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.*;
+
 public class NeuralDataHelper {
 
+  public static final String LOG_PLACEHOLDER = "{}";
   public static final String IND_ARRAY_VALUE_SEPARATOR = ":";
   public static final String INPUT = "Example Neural Net Input";
   public static final String LABEL = " Label=";
@@ -63,7 +73,9 @@ public class NeuralDataHelper {
       
       chosenExamples.add(new Pair<>(currentInput, currentLabel));
       
-      logger.info(INPUT + currentInput + LABEL + currentLabel);
+      logger.info(INPUT + LOG_PLACEHOLDER + LABEL + LOG_PLACEHOLDER,
+          currentInput,
+          currentLabel);
     }
     
     return chosenExamples;
@@ -78,8 +90,9 @@ public class NeuralDataHelper {
 
       int randomRow = randomGenerator.nextInt(numberOfInputsLables);
 
-      logger.info(INPUT + NEW_LINE + adaptedFetauresLabels.get(randomRow).getFirst() + NEW_LINE + LABEL +
-                  adaptedFetauresLabels.get(randomRow).getSecond());
+      logger.info(INPUT + NEW_LINE + LOG_PLACEHOLDER + NEW_LINE + LABEL + LOG_PLACEHOLDER,
+          adaptedFetauresLabels.get(randomRow).getFirst(),
+          adaptedFetauresLabels.get(randomRow).getSecond());
     }
   }
 
@@ -106,6 +119,43 @@ public class NeuralDataHelper {
   public static INDArray readLabels(String labelPath) {
 
     return Nd4j.readTxtString(NeuralDataHelper.class.getResourceAsStream(labelPath));
+  }
+  
+  public static void writeLabelDirectories(List<Pair<INDArray, INDArray>> convertedPlaygroundsResults) {
+    
+    Path directoryPath = Paths.get("input");
+    
+    for (int label = 0; label < COLUMN_COUNT; label++) {
+      
+      Path labelDirectoryPath = Paths.get(directoryPath.toString(), String.valueOf(label));
+      try {
+        Files.createDirectory(labelDirectoryPath);
+      } catch (IOException ioe) {
+        logger.error("Directory not created.", ioe);
+      }
+    }
+    
+    for (int row = 0; row < convertedPlaygroundsResults.size(); row++) {
+      
+      INDArray currentPlayground = convertedPlaygroundsResults.get(row).getFirst();
+      INDArray currentLabel = convertedPlaygroundsResults.get(row).getSecond();
+      
+      int label = Nd4j.getExecutioner().execAndReturn(new IMax(currentLabel)).getFinalResult().intValue();
+      
+      Path labeledPlaygroundPath = Paths.get(directoryPath.toString(), String.valueOf(label), String.valueOf(row));
+      
+      String pl = String.valueOf(currentPlayground).substring(2);
+      
+      String output = pl.substring(0, pl.length() - 2) + "," + label;
+      
+      try (PrintWriter writer = new PrintWriter(labeledPlaygroundPath.toString())) {
+        
+        writer.write(output);
+        writer.flush();
+      } catch (FileNotFoundException fnfe) {
+        logger.error("Output File path not found.", fnfe);
+      }
+    }
   }
 
   public static void writeData(List<Pair<INDArray, INDArray>> allPlaygroundsResults) {
@@ -147,5 +197,4 @@ public class NeuralDataHelper {
     Nd4j.writeTxt(stackedMinPlaygroundsLabels.getSecond(), "labelsMin.txt");
 
   }
-
 }

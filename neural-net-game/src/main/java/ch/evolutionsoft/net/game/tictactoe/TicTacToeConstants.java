@@ -3,8 +3,6 @@ package ch.evolutionsoft.net.game.tictactoe;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import ch.evolutionsoft.net.game.NeuralNetConstants;
-
 public final class TicTacToeConstants {
 
   private TicTacToeConstants() {
@@ -14,9 +12,9 @@ public final class TicTacToeConstants {
   /**
    * TicTacToe playground in one row.
    */
-  public static final int ROW_NUMBER = 1;
-  public static final int COLUMN_NUMBER = 9;
-  public static final INDArray EMPTY_PLAYGROUND = Nd4j.zeros(ROW_NUMBER, COLUMN_NUMBER);
+  public static final int ROW_COUNT = 1;
+  public static final int COLUMN_COUNT = 9;
+  public static final INDArray EMPTY_PLAYGROUND = Nd4j.zeros(ROW_COUNT, COLUMN_COUNT);
 
   public static final int FIELD_1 = 0;
   public static final int FIELD_2 = 1;
@@ -70,27 +68,27 @@ public final class TicTacToeConstants {
   public static final double MIN_PLAYER = -1.0;
   public static final double EMPTY_FIELD_VALUE = 0.0;
 
-  public static final INDArray CENTER_FIELD_MOVE = Nd4j.zeros(1, COLUMN_NUMBER).putScalar(FIELD_5, MAX_PLAYER);
-  public static final INDArray LAST_CORNER_FIELD_MOVE = Nd4j.zeros(1, COLUMN_NUMBER).putScalar(FIELD_9, MAX_PLAYER);
+  public static final INDArray CENTER_FIELD_MOVE = Nd4j.zeros(1, COLUMN_COUNT).putScalar(FIELD_5, MAX_PLAYER);
+  public static final INDArray LAST_CORNER_FIELD_MOVE = Nd4j.zeros(1, COLUMN_COUNT).putScalar(FIELD_9, MAX_PLAYER);
 
   /**
    * Result labels interpretation. MAX_WIN - 9 > DRAW_VALUE > MIN_WIN + 9 for
    * MiniMax comparison. Any occupied playground field leads to a zero result.
    */
-  public static final double MAX_WIN = 10;
-  public static final double MIN_WIN = -10;
+  public static final int MAX_WIN = 10;
+  public static final int MIN_WIN = -10;
   public static final int DEPTH_ADVANTAGE = 1;
-  public static final double MINIMAX_DRAW_VALUE = 0;
+  public static final int MINIMAX_DRAW_VALUE = 0;
   public static final double OCCUPIED = 0;
 
   /**
    * Result labels for neural nets 0 corresponds to a field that we don't want to play
-   * 1 to a field that we want to play, leading to at least a draw from the current
+   * 1 to a field that we want to play, leading to all possible results from the current
    * player perspective.
    */
   public static final double NET_WIN = 1.0;
   public static final double NET_DRAW = 1.0;
-  public static final double NET_LOSS = NeuralNetConstants.ZERO;
+  public static final double NET_LOSS = 1.0;
   
   public static final int SMALL_CAPACITY = 10;
 }
