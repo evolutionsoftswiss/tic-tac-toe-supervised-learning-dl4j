@@ -2,6 +2,8 @@ package ch.evolutionsoft.example.dl4j.tictactoe.feedforward;
 
 import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
 
+import java.util.List;
+
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
@@ -9,7 +11,9 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.learning.config.Nesterovs;
+import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +40,10 @@ public class FeedForwardFourLayerMain {
       logger.info(net.summary());
     }
 
-    feedForwardCommon.trainNetworkModel(net);
+    List<Pair<INDArray, INDArray>> allPlaygroundsLabels = feedForwardCommon.trainNetworkModel(net);
 
-    feedForwardCommon.evaluateNetworkPerformance(net, feedForwardCommon.stackPlaygroundInputsLabels());
+    feedForwardCommon.evaluateNetworkPerformance(net,
+        feedForwardCommon.stackPlaygroundInputsLabels(allPlaygroundsLabels));
   }
 
   public NeuralNetConfiguration.Builder createGeneralConfiguration() {

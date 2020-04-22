@@ -32,7 +32,6 @@ public final class TicTacToeConstants {
   public static final int IMAGE_SIZE = 3;
   public static final int IMAGE_CHANNELS = 3;
   public static final int IMAGE_POINTS = 9;
-  public static final int[] IMAGE_DIMENSION = new int[] {IMAGE_SIZE, IMAGE_SIZE};
   
   public static final int EMPTY_FIELDS_CHANNEL = 0;
   public static final int MAX_PLAYER_CHANNEL = 1;
@@ -43,23 +42,6 @@ public final class TicTacToeConstants {
   
   public static final INDArray ZEROS_PLAYGROUND_IMAGE = Nd4j.zeros(1, IMAGE_SIZE, IMAGE_SIZE);
   public static final INDArray ONES_PLAYGROUND_IMAGE = Nd4j.ones(1, IMAGE_SIZE, IMAGE_SIZE);
-  
-  public static final INDArray EMPTY_CONVOLUTIONAL_PLAYGROUND = Nd4j.create(IMAGE_CHANNELS, IMAGE_SIZE, IMAGE_SIZE);
-  static {
-    EMPTY_CONVOLUTIONAL_PLAYGROUND.putRow(EMPTY_FIELDS_CHANNEL, ONES_PLAYGROUND_IMAGE);
-    EMPTY_CONVOLUTIONAL_PLAYGROUND.putRow(MAX_PLAYER_CHANNEL, ZEROS_PLAYGROUND_IMAGE);
-    EMPTY_CONVOLUTIONAL_PLAYGROUND.putRow(MIN_PLAYER_CHANNEL, ZEROS_PLAYGROUND_IMAGE);
-  }
-
-  public static final int[] FIELD_1_2D = new int[] {0,0};
-  public static final int[] FIELD_2_2D = new int[] {0,1};
-  public static final int[] FIELD_3_2D = new int[] {0,2};
-  public static final int[] FIELD_4_2D = new int[] {1,0};
-  public static final int[] FIELD_5_2D = new int[] {1,1};
-  public static final int[] FIELD_6_2D = new int[] {1,2};
-  public static final int[] FIELD_7_2D = new int[] {2,0};
-  public static final int[] FIELD_8_2D = new int[] {2,1};
-  public static final int[] FIELD_9_2D = new int[] {2,2};
 
   /**
    * Non empty playground fields ("crosses or circles"), empty is zero.

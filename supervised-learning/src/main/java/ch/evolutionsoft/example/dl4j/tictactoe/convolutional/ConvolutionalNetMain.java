@@ -3,7 +3,6 @@ package ch.evolutionsoft.example.dl4j.tictactoe.convolutional;
 import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
 import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.*;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.deeplearning4j.datasets.iterator.INDArrayDataSetIterator;
@@ -37,13 +36,44 @@ import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.evolutionsoft.example.dl4j.tictactoe.feedforward.FeedForwardCommon;
 import ch.evolutionsoft.net.game.NeuralDataHelper;
 import ch.evolutionsoft.net.game.tictactoe.TicTacToeNeuralDataConverter;
 
 public class ConvolutionalNetMain {
 
-  public static final double LEARNING_RATE = 0.031;
+  private static final String BLOCK2_SEPARABLE_CONVOLUTION1 = "block2_sepconv1";
+
+  private static final String BLOCK2_SEPARABLE_CONVOLUTION1_BATCH_NORMALIZATION = "block2_sepconv1_bn";
+
+  private static final String BLOCK2_SEPARABLE_CONVOLUTION2 = "block2_sepconv2";
+
+  private static final String BLOCK2_SEPARABLE_CONVOLUTION2_BATCH_NORNMALIZATION = "block2_sepconv2_bn";
+
+  private static final String ADD1 = "add1";
+
+  private static final String BLOCK2_POOL = "block2_pool";
+
+  private static final String RESIDUAL1 = "residual1";
+
+  private static final String RESIDUAL1_CONVOLUTION = "residual1_conv";
+
+  private static final String BLOCK1_CONVOLUTION2_BATCH_NORMALIZATION = "block1_conv2_bn";
+
+  private static final String BLOCK1_CONVOLUTION2 = "block1_conv2";
+
+  private static final String BLOCK1_CONVOLUTION1_ACTIVATION = "block1_conv1_act";
+
+  private static final String BLOCK1_CONVOLUTION1 = "block1_conv1";
+
+  private static final String INPUT = "input";
+
+  private static final String BLOCK2_SEPCONV1_ACTIVATION = "block2_sepconv1_act";
+
+  private static final String BLOCK1_CONV2_ACTIVATION = "block1_conv2_act";
+
+  private static final String BLOCK1_CONV1_BATCH_NORMALIZATION = "block1_conv1_bn";
+
+  public static final double LEARNING_RATE = 0.029;
 
   public static final int NUMBER_OF_EPOCHS = 500;
 
@@ -51,7 +81,7 @@ public class ConvolutionalNetMain {
 
   private static final Logger logger = LoggerFactory.getLogger(ConvolutionalNetMain.class);
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
 
     ConvolutionalNetMain convolutionalNetMain = new ConvolutionalNetMain();
 
@@ -112,11 +142,10 @@ public class ConvolutionalNetMain {
     return graphSingleBatchInput2;
   }
 
-  protected DataSet trainNetwork(ComputationGraph net)
-      throws IOException {
+  protected DataSet trainNetwork(ComputationGraph net) {
 
     List<Pair<INDArray, INDArray>> allPlaygroundsResults =
-        NeuralDataHelper.readAll(FeedForwardCommon.INPUTS_PATH, FeedForwardCommon.LABELS_PATH);
+        NeuralDataHelper.readAll("/inputs.txt", "/labels.txt");
 
     List<Pair<INDArray, INDArray>> trainDataSetPairsList =
         TicTacToeNeuralDataConverter.convertMiniMaxPlaygroundLabelsToConvolutionalData(allPlaygroundsResults);
@@ -163,51 +192,51 @@ public class ConvolutionalNetMain {
   ComputationGraphConfiguration createConvolutionalGraphConfiguration() {
 
     return new ComputationGraphConfiguration.GraphBuilder(createGeneralConfiguration())
-        .addInputs("input").setInputTypes(InputType.convolutional(3, 3, 3))
+        .addInputs(INPUT).setInputTypes(InputType.convolutional(3, 3, 3))
         // block1
-        .addLayer("block1_conv1",
+        .addLayer(BLOCK1_CONVOLUTION1,
             new ConvolutionLayer.Builder(2, 2).stride(1, 1).nIn(3).nOut(7).hasBias(false)
                 .build(),
-            "input")
-        .addLayer("block1_conv1_bn", new BatchNormalization(), "block1_conv1")
-        .addLayer("block1_conv1_act", new ActivationLayer(Activation.RELU), "block1_conv1_bn")
-        .addLayer("block1_conv2",
+            INPUT)
+        .addLayer(BLOCK1_CONV1_BATCH_NORMALIZATION, new BatchNormalization(), BLOCK1_CONVOLUTION1)
+        .addLayer(BLOCK1_CONVOLUTION1_ACTIVATION, new ActivationLayer(Activation.RELU), BLOCK1_CONV1_BATCH_NORMALIZATION)
+        .addLayer(BLOCK1_CONVOLUTION2,
             new ConvolutionLayer.Builder(2, 2).stride(1, 1).padding(1, 1).nOut(14).hasBias(false)
                 .build(),
-            "block1_conv1_act")
-        .addLayer("block1_conv2_bn", new BatchNormalization(), "block1_conv2")
-        .addLayer("block1_conv2_act", new ActivationLayer(Activation.RELU), "block1_conv2_bn")
+            BLOCK1_CONVOLUTION1_ACTIVATION)
+        .addLayer(BLOCK1_CONVOLUTION2_BATCH_NORMALIZATION, new BatchNormalization(), BLOCK1_CONVOLUTION2)
+        .addLayer(BLOCK1_CONV2_ACTIVATION, new ActivationLayer(Activation.RELU), BLOCK1_CONVOLUTION2_BATCH_NORMALIZATION)
 
         // residual1
-        .addLayer("residual1_conv",
+        .addLayer(RESIDUAL1_CONVOLUTION,
             new ConvolutionLayer.Builder(2, 2).stride(1, 1).nOut(14).hasBias(false)
                 .convolutionMode(ConvolutionMode.Same).build(),
-            "block1_conv2_act")
-        .addLayer("residual1", new BatchNormalization(), "residual1_conv")
+            BLOCK1_CONV2_ACTIVATION)
+        .addLayer(RESIDUAL1, new BatchNormalization(), RESIDUAL1_CONVOLUTION)
 
         // block2
-        .addLayer("block2_sepconv1",
+        .addLayer(BLOCK2_SEPARABLE_CONVOLUTION1,
             new SeparableConvolution2D.Builder(2, 2).nOut(14).hasBias(false).convolutionMode(ConvolutionMode.Same)
                 .build(),
-            "block1_conv2_act")
-        .addLayer("block2_sepconv1_bn", new BatchNormalization(), "block2_sepconv1")
-        .addLayer("block2_sepconv1_act", new ActivationLayer(Activation.RELU), "block2_sepconv1_bn")
-        .addLayer("block2_sepconv2",
+            BLOCK1_CONV2_ACTIVATION)
+        .addLayer(BLOCK2_SEPARABLE_CONVOLUTION1_BATCH_NORMALIZATION, new BatchNormalization(), BLOCK2_SEPARABLE_CONVOLUTION1)
+        .addLayer(BLOCK2_SEPCONV1_ACTIVATION, new ActivationLayer(Activation.RELU), BLOCK2_SEPARABLE_CONVOLUTION1_BATCH_NORMALIZATION)
+        .addLayer(BLOCK2_SEPARABLE_CONVOLUTION2,
             new SeparableConvolution2D.Builder(2, 2).nOut(14).hasBias(false).convolutionMode(ConvolutionMode.Same)
                 .build(),
-            "block2_sepconv1_act")
-        .addLayer("block2_sepconv2_bn", new BatchNormalization(), "block2_sepconv2")
-        .addLayer("block2_pool",
+            BLOCK2_SEPCONV1_ACTIVATION)
+        .addLayer(BLOCK2_SEPARABLE_CONVOLUTION2_BATCH_NORNMALIZATION, new BatchNormalization(), BLOCK2_SEPARABLE_CONVOLUTION2)
+        .addLayer(BLOCK2_POOL,
             new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.AVG).kernelSize(2, 2).stride(1, 1)
                 .convolutionMode(ConvolutionMode.Same).build(),
-            "block2_sepconv2_bn")
+            BLOCK2_SEPARABLE_CONVOLUTION2_BATCH_NORNMALIZATION)
         
-        .addVertex("add1", new ElementWiseVertex(ElementWiseVertex.Op.Add), "block2_pool", "residual1")
+        .addVertex(ADD1, new ElementWiseVertex(ElementWiseVertex.Op.Add), BLOCK2_POOL, RESIDUAL1)
         
         .addLayer(DEFAULT_OUTPUT_LAYER_NAME, new OutputLayer.Builder()
             .nOut(9)
             .activation(Activation.SOFTMAX)
-            .build(), "add1")
+            .build(), ADD1)
         .setOutputs(DEFAULT_OUTPUT_LAYER_NAME)
         .build();
   }

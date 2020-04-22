@@ -32,9 +32,6 @@ public class FeedForwardCommon {
 
   private static final int NUMBER_OF_EPOCHS = 2000;
 
-  public static final String INPUTS_PATH = "/inputs.txt";
-  public static final String LABELS_PATH = "/labels.txt";
-
   public MultiLayerNetwork createNetworkModel(MultiLayerConfiguration multiLayerConfiguration) {
 
     String message = "Build model ...";
@@ -46,12 +43,12 @@ public class FeedForwardCommon {
     return net;
   }
 
-  public void trainNetworkModel(MultiLayerNetwork net) {
+  public List<Pair<INDArray, INDArray>> trainNetworkModel(MultiLayerNetwork net) {
 
     String message = "Generate adapted net input and labels ...";
     logger.info(message);
 
-    List<Pair<INDArray, INDArray>> allPlaygrounds = NeuralDataHelper.readAll(INPUTS_PATH, LABELS_PATH);
+    List<Pair<INDArray, INDArray>> allPlaygrounds = NeuralDataHelper.readAll("/input.txt", "/labels.txt");
     List<Pair<INDArray, INDArray>> convertedMiniMaxLabels = TicTacToeNeuralDataConverter.convertMiniMaxLabels(allPlaygrounds);
 
     NeuralDataHelper.printRandomMiniMaxData(allPlaygrounds, DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG);
@@ -66,6 +63,8 @@ public class FeedForwardCommon {
 
       net.fit(randomBalancedDataSet);
     }
+    
+    return allPlaygrounds;
   }
 
   public DataSet getTrainDataSetWithMaxLabelExampleSize(List<Pair<INDArray, INDArray>> convertedMiniMaxLabels) {
@@ -107,9 +106,8 @@ public class FeedForwardCommon {
     return new org.nd4j.linalg.dataset.DataSet(stackedPlaygrounds, stackedLabels);
   }
 
-  public DataSet stackPlaygroundInputsLabels() {
+  public DataSet stackPlaygroundInputsLabels(List<Pair<INDArray, INDArray>> allPlaygrounds) {
 
-    List<Pair<INDArray, INDArray>> allPlaygrounds = NeuralDataHelper.readAll(INPUTS_PATH, LABELS_PATH);
     List<Pair<INDArray, INDArray>> convertedMiniMaxLabels = TicTacToeNeuralDataConverter.convertMiniMaxLabels(allPlaygrounds);
 
     Pair<INDArray, INDArray> stackedPlaygroundLabels =
