@@ -72,8 +72,7 @@ public class FeedForwardCommon {
 
     Pair<INDArray, INDArray> stackedPlaygroundLabels =
         TicTacToeNeuralDataConverter.stackFeedForwardPlaygroundLabels(convertedMiniMaxLabels);
-    
-    //label Statistics distribution is (1449, 421, 581, 313, 618, 227, 360, 170, 318)
+
     INDArray labelStatisticsNdArray = stackedPlaygroundLabels.getSecond().sum(0);
     
     double[] labelStatistics = labelStatisticsNdArray.toDoubleVector();
