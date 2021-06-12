@@ -8,6 +8,6 @@ It provides two classes with constants and a TicTacToeGameHelper with some funct
 
 The TicTacToeNeuralDataConverter contains methods to rearrange the labeled Inputs for a neural network.
 It generates network labels from MiniMax tree search results. The playground is represented as one dimensional array with 9 columns, e.g. for dense nets.
-On the other hand it also generates image like playground representations with three channels, one for empty fields, and two for each player. That representation is like a 3x3 pixel image with three channels and has thus the shape (3, 3, 3).
+On the other hand it also generates image like playground representations with three channels, one for player to move with constant values 1 and -1 for first and second player. And two channels for each player crosses and circles moves. That representation is like a 3x3 pixel image with three channels and has thus the shape (3, 3, 3).
 
 The TicTacToeMiniMaxGenerator can be used to regenerate the move space.
