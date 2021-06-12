@@ -3,6 +3,8 @@ package ch.evolutionsoft.example.dl4j.tictactoe.convolutional;
 import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
 import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.deeplearning4j.datasets.iterator.INDArrayDataSetIterator;
@@ -25,6 +27,8 @@ import org.deeplearning4j.nn.conf.layers.SeparableConvolution2D;
 import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -32,7 +36,6 @@ import org.nd4j.linalg.dataset.api.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Adam;
-import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +84,7 @@ public class ConvolutionalNetMain {
 
   private static final Logger logger = LoggerFactory.getLogger(ConvolutionalNetMain.class);
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
 
     ConvolutionalNetMain convolutionalNetMain = new ConvolutionalNetMain();
 
@@ -121,9 +124,8 @@ public class ConvolutionalNetMain {
   protected INDArray generateCenterFieldInputImages() {
 
     INDArray middleFieldMove = Nd4j.zeros(IMAGE_CHANNELS, IMAGE_SIZE, IMAGE_SIZE);
-    INDArray emptyImage1 = Nd4j.ones(1, IMAGE_SIZE, IMAGE_SIZE);
-    emptyImage1.putScalar(0, 1, 1, OCCUPIED);
-    middleFieldMove.putRow(0, emptyImage1);
+    INDArray playerImage = Nd4j.ones(1, IMAGE_SIZE, IMAGE_SIZE).mul(-1);
+    middleFieldMove.putRow(0, playerImage);
     middleFieldMove.putScalar(1, 1, 1, MAX_PLAYER);
     INDArray graphSingleBatchInput1 = Nd4j.create(1, IMAGE_CHANNELS, IMAGE_SIZE, IMAGE_SIZE);
     graphSingleBatchInput1.putRow(0, middleFieldMove);
@@ -133,16 +135,15 @@ public class ConvolutionalNetMain {
   protected INDArray generateLastCornerFieldInputImages() {
 
     INDArray cornerFieldMove = Nd4j.zeros(IMAGE_CHANNELS, IMAGE_SIZE, IMAGE_SIZE);
-    INDArray emptyImage2 = Nd4j.ones(1, IMAGE_SIZE, IMAGE_SIZE);
-    emptyImage2.putScalar(0, 2, 2, OCCUPIED);
-    cornerFieldMove.putRow(0, emptyImage2);
+    INDArray playerImage = Nd4j.ones(1, IMAGE_SIZE, IMAGE_SIZE).mul(-1);
+    cornerFieldMove.putRow(0, playerImage);
     cornerFieldMove.putScalar(1, 2, 2, MAX_PLAYER);
     INDArray graphSingleBatchInput2 = Nd4j.create(1, IMAGE_CHANNELS, IMAGE_SIZE, IMAGE_SIZE);
     graphSingleBatchInput2.putRow(0, cornerFieldMove);
     return graphSingleBatchInput2;
   }
 
-  protected DataSet trainNetwork(ComputationGraph net) {
+  protected DataSet trainNetwork(ComputationGraph net) throws IOException {
 
     List<Pair<INDArray, INDArray>> allPlaygroundsResults =
         NeuralDataHelper.readAll("/inputs.txt", "/labels.txt");
@@ -153,6 +154,8 @@ public class ConvolutionalNetMain {
     NeuralDataHelper.printRandomConvolutionalNetInputAndLabels(trainDataSetPairsList,
         DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG);
 
+    // Workaround https://github.com/eclipse/deeplearning4j/issues/8961
+    Nd4j.getEnvironment().allowHelpers(false);
     DataSetIterator dataSetIterator = new INDArrayDataSetIterator(trainDataSetPairsList, DEFAULT_BATCH_SIZE);
 
     EarlyStoppingConfiguration<ComputationGraph> earlyStoppingConfiguration =
@@ -161,6 +164,11 @@ public class ConvolutionalNetMain {
     EarlyStoppingGraphTrainer trainer = new EarlyStoppingGraphTrainer(earlyStoppingConfiguration, net, dataSetIterator);
 
     trainer.fit();
+    
+    // End workaround
+    Nd4j.getEnvironment().allowHelpers(true);
+    
+    ModelSerializer.writeModel(net, new File("TicTacToeResidualNet.bin"), false);
 
     Pair<INDArray, INDArray> stackedPlaygroundLabels =
         TicTacToeNeuralDataConverter.stackConvolutionalPlaygroundLabels(trainDataSetPairsList);

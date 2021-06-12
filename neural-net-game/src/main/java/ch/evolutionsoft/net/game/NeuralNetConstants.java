@@ -8,7 +8,7 @@ public final class NeuralNetConstants {
     // Hide constructor
   }
 
-  public static final Integer DEFAULT_SEED = 235711;
+  public static final long DEFAULT_SEED = 235711;
 
   public static final Random randomGenerator = new Random(DEFAULT_SEED);
   

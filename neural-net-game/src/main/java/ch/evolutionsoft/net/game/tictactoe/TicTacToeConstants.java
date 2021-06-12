@@ -33,7 +33,7 @@ public final class TicTacToeConstants {
   public static final int IMAGE_CHANNELS = 3;
   public static final int IMAGE_POINTS = 9;
   
-  public static final int EMPTY_FIELDS_CHANNEL = 0;
+  public static final int PLAYER_CHANNEL = 0;
   public static final int MAX_PLAYER_CHANNEL = 1;
   public static final int MIN_PLAYER_CHANNEL = 2;
   
@@ -42,6 +42,14 @@ public final class TicTacToeConstants {
   
   public static final INDArray ZEROS_PLAYGROUND_IMAGE = Nd4j.zeros(1, IMAGE_SIZE, IMAGE_SIZE);
   public static final INDArray ONES_PLAYGROUND_IMAGE = Nd4j.ones(1, IMAGE_SIZE, IMAGE_SIZE);
+  public static final INDArray MINUS_ONES_PLAYGROUND_IMAGE = ZEROS_PLAYGROUND_IMAGE.sub(1);
+  
+  public static final INDArray EMPTY_CONVOLUTIONAL_PLAYGROUND = Nd4j.create(IMAGE_CHANNELS, IMAGE_SIZE, IMAGE_SIZE);
+  static {
+    EMPTY_CONVOLUTIONAL_PLAYGROUND.putRow(PLAYER_CHANNEL, ONES_PLAYGROUND_IMAGE);
+    EMPTY_CONVOLUTIONAL_PLAYGROUND.putRow(MAX_PLAYER_CHANNEL, ZEROS_PLAYGROUND_IMAGE);
+    EMPTY_CONVOLUTIONAL_PLAYGROUND.putRow(MIN_PLAYER_CHANNEL, ZEROS_PLAYGROUND_IMAGE);
+  }
 
   /**
    * Non empty playground fields ("crosses or circles"), empty is zero.
