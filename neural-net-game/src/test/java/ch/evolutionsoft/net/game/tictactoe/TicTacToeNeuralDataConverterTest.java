@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.nd4j.common.primitives.Pair;
 import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.primitives.Pair;
 
 import static ch.evolutionsoft.net.game.NeuralNetConstants.*;
 import static ch.evolutionsoft.net.game.tictactoe.TicTacToeConstants.*;

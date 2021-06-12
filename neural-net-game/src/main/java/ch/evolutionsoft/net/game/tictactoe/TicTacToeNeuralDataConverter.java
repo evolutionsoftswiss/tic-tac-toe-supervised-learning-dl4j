@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.primitives.Pair;
 
 import ch.evolutionsoft.net.game.NeuralNetConstants;
 
@@ -103,12 +103,14 @@ public class TicTacToeNeuralDataConverter {
 
   public static INDArray convertTo3x3Image(INDArray playgroundArray) {
 
-    INDArray emptyArray = Nd4j.zeros(IMAGE_SIZE, IMAGE_SIZE);
+    INDArray playerArray = Nd4j.zeros(IMAGE_SIZE, IMAGE_SIZE);
     INDArray maxArray = Nd4j.zeros(IMAGE_SIZE, IMAGE_SIZE);
     INDArray minArray = Nd4j.zeros(IMAGE_SIZE, IMAGE_SIZE);
 
-    for (int row = 0; row < IMAGE_SIZE; row++) {
+    int occupiedFields = 0;
 
+    for (int row = 0; row < IMAGE_SIZE; row++) {
+      
       for (int column = 0; column < IMAGE_SIZE; column++) {
 
         int flatIndex = IMAGE_SIZE * row + column;
@@ -117,20 +119,26 @@ public class TicTacToeNeuralDataConverter {
         if (playgroundValue == MIN_PLAYER) {
 
           minArray.putScalar(row, column, 1);
+          occupiedFields++;
 
         } else if (playgroundValue == MAX_PLAYER) {
 
           maxArray.putScalar(row, column, 1);
-
-        } else {
-
-          emptyArray.putScalar(row, column, 1);
+          occupiedFields++;
         }
+      }
+      if (0 == occupiedFields % 2) {
+        
+        playerArray = Nd4j.ones(IMAGE_SIZE, IMAGE_SIZE);
+      
+      } else {
+        
+        playerArray = Nd4j.ones(IMAGE_SIZE, IMAGE_SIZE).mul(-1);
       }
     }
 
     INDArray playgroundImage = Nd4j.create(IMAGE_CHANNELS, IMAGE_SIZE, IMAGE_SIZE);
-    playgroundImage.putRow(0, emptyArray);
+    playgroundImage.putRow(0, playerArray);
     playgroundImage.putRow(1, maxArray);
     playgroundImage.putRow(2, minArray);
 

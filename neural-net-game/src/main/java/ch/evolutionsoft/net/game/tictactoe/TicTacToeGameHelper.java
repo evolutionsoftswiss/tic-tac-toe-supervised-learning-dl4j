@@ -90,39 +90,62 @@ public class TicTacToeGameHelper {
   public static int countStones(INDArray playground) {
 
     int countStones = 0;
-    for (int arrayIndex = 0; arrayIndex < COLUMN_COUNT; arrayIndex++) {
-
-      if (!equalsEpsilon(playground.getDouble(arrayIndex), EMPTY_FIELD_VALUE, DOUBLE_COMPARISON_EPSILON)) {
-
-        countStones++;
+    
+    if (COLUMN_COUNT == playground.shape()[0]) {
+      
+      for (int column = 0; column < COLUMN_COUNT; column++) {
+        
+        if (!equalsEpsilon(playground.getDouble(column), EMPTY_FIELD_VALUE, DOUBLE_COMPARISON_EPSILON)) {
+  
+          countStones++;
+        }
       }
+      
+    } else {
+      
+      countStones = countMaxStones(playground) + countMinStones(playground);
     }
+    
     return countStones;
   }
 
   public static int countMaxStones(INDArray playground) {
 
     int countMaxStones = 0;
-    for (int arrayIndex = 0; arrayIndex < COLUMN_COUNT; arrayIndex++) {
 
-      if (equalsEpsilon(playground.getDouble(0, arrayIndex), MAX_PLAYER, DOUBLE_COMPARISON_EPSILON)) {
+    INDArray maxPlayerFields = playground.slice(MAX_PLAYER_CHANNEL);
+    
+    for (int row = 0; row < IMAGE_SIZE; row++) {
 
-        countMaxStones++;
+      for (int column = 0; column < IMAGE_SIZE; column++) {
+          
+        if (equalsEpsilon(maxPlayerFields.getDouble(row, column), OCCUPIED_IMAGE_POINT, DOUBLE_COMPARISON_EPSILON)) {
+  
+          countMaxStones++;
+        }
       }
     }
+    
     return countMaxStones;
   }
 
   public static int countMinStones(INDArray playground) {
 
     int countMinStones = 0;
-    for (int arrayIndex = 0; arrayIndex < COLUMN_COUNT; arrayIndex++) {
 
-      if (equalsEpsilon(playground.getDouble(0, arrayIndex), MIN_PLAYER, DOUBLE_COMPARISON_EPSILON)) {
+    INDArray minPlayerFields = playground.slice(MIN_PLAYER_CHANNEL);
+    
+    for (int row = 0; row < IMAGE_SIZE; row++) {
 
-        countMinStones++;
+      for (int column = 0; column < IMAGE_SIZE; column++) {
+          
+        if (equalsEpsilon(minPlayerFields.getDouble(row, column), OCCUPIED_IMAGE_POINT, DOUBLE_COMPARISON_EPSILON)) {
+  
+          countMinStones++;
+        }
       }
     }
+      
     return countMinStones;
   }
 

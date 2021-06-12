@@ -13,13 +13,13 @@ import org.deeplearning4j.earlystopping.termination.MaxScoreIterationTermination
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.api.ops.impl.indexaccum.IMax;
 import org.nd4j.linalg.dataset.api.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.primitives.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class FeedForwardCommon {
     String message = "Generate adapted net input and labels ...";
     logger.info(message);
 
-    List<Pair<INDArray, INDArray>> allPlaygrounds = NeuralDataHelper.readAll("/input.txt", "/labels.txt");
+    List<Pair<INDArray, INDArray>> allPlaygrounds = NeuralDataHelper.readAll("/inputs.txt", "/labels.txt");
     List<Pair<INDArray, INDArray>> convertedMiniMaxLabels = TicTacToeNeuralDataConverter.convertMiniMaxLabels(allPlaygrounds);
 
     NeuralDataHelper.printRandomMiniMaxData(allPlaygrounds, DEFAULT_FEATURE_EXAMPLE_NUMBER_LOG);
