@@ -33,7 +33,7 @@ public final class TicTacToeConstants {
   public static final int IMAGE_CHANNELS = 3;
   public static final int IMAGE_POINTS = 9;
   
-  public static final int PLAYER_CHANNEL = 0;
+  public static final int CURRENT_PLAYER_CHANNEL = 0;
   public static final int MAX_PLAYER_CHANNEL = 1;
   public static final int MIN_PLAYER_CHANNEL = 2;
   
@@ -46,7 +46,7 @@ public final class TicTacToeConstants {
   
   public static final INDArray EMPTY_CONVOLUTIONAL_PLAYGROUND = Nd4j.create(IMAGE_CHANNELS, IMAGE_SIZE, IMAGE_SIZE);
   static {
-    EMPTY_CONVOLUTIONAL_PLAYGROUND.putRow(PLAYER_CHANNEL, ONES_PLAYGROUND_IMAGE);
+    EMPTY_CONVOLUTIONAL_PLAYGROUND.putRow(CURRENT_PLAYER_CHANNEL, ONES_PLAYGROUND_IMAGE);
     EMPTY_CONVOLUTIONAL_PLAYGROUND.putRow(MAX_PLAYER_CHANNEL, ZEROS_PLAYGROUND_IMAGE);
     EMPTY_CONVOLUTIONAL_PLAYGROUND.putRow(MIN_PLAYER_CHANNEL, ZEROS_PLAYGROUND_IMAGE);
   }
