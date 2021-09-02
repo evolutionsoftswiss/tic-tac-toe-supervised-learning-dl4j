@@ -78,7 +78,7 @@ public class ConvolutionalNetMain {
 
   public static final double LEARNING_RATE = 0.029;
 
-  public static final int NUMBER_OF_EPOCHS = 500;
+  public static final int NUMBER_OF_EPOCHS = 300;
 
   public static final int CNN_OUTPUT_CHANNELS = 3;
 
@@ -203,13 +203,13 @@ public class ConvolutionalNetMain {
         .addInputs(INPUT).setInputTypes(InputType.convolutional(3, 3, 3))
         // block1
         .addLayer(BLOCK1_CONVOLUTION1,
-            new ConvolutionLayer.Builder(2, 2).stride(1, 1).nIn(3).nOut(7).hasBias(false)
+            new ConvolutionLayer.Builder(2, 2).stride(1, 1).nIn(3).nOut(8).hasBias(false)
                 .build(),
             INPUT)
         .addLayer(BLOCK1_CONV1_BATCH_NORMALIZATION, new BatchNormalization(), BLOCK1_CONVOLUTION1)
         .addLayer(BLOCK1_CONVOLUTION1_ACTIVATION, new ActivationLayer(Activation.RELU), BLOCK1_CONV1_BATCH_NORMALIZATION)
         .addLayer(BLOCK1_CONVOLUTION2,
-            new ConvolutionLayer.Builder(2, 2).stride(1, 1).padding(1, 1).nOut(14).hasBias(false)
+            new ConvolutionLayer.Builder(2, 2).stride(1, 1).padding(1, 1).nOut(16).hasBias(false)
                 .build(),
             BLOCK1_CONVOLUTION1_ACTIVATION)
         .addLayer(BLOCK1_CONVOLUTION2_BATCH_NORMALIZATION, new BatchNormalization(), BLOCK1_CONVOLUTION2)
@@ -217,20 +217,20 @@ public class ConvolutionalNetMain {
 
         // residual1
         .addLayer(RESIDUAL1_CONVOLUTION,
-            new ConvolutionLayer.Builder(2, 2).stride(1, 1).nOut(14).hasBias(false)
+            new ConvolutionLayer.Builder(2, 2).stride(1, 1).nOut(16).hasBias(false)
                 .convolutionMode(ConvolutionMode.Same).build(),
             BLOCK1_CONV2_ACTIVATION)
         .addLayer(RESIDUAL1, new BatchNormalization(), RESIDUAL1_CONVOLUTION)
 
         // block2
         .addLayer(BLOCK2_SEPARABLE_CONVOLUTION1,
-            new SeparableConvolution2D.Builder(2, 2).nOut(14).hasBias(false).convolutionMode(ConvolutionMode.Same)
+            new SeparableConvolution2D.Builder(2, 2).nOut(16).hasBias(false).convolutionMode(ConvolutionMode.Same)
                 .build(),
             BLOCK1_CONV2_ACTIVATION)
         .addLayer(BLOCK2_SEPARABLE_CONVOLUTION1_BATCH_NORMALIZATION, new BatchNormalization(), BLOCK2_SEPARABLE_CONVOLUTION1)
         .addLayer(BLOCK2_SEPCONV1_ACTIVATION, new ActivationLayer(Activation.RELU), BLOCK2_SEPARABLE_CONVOLUTION1_BATCH_NORMALIZATION)
         .addLayer(BLOCK2_SEPARABLE_CONVOLUTION2,
-            new SeparableConvolution2D.Builder(2, 2).nOut(14).hasBias(false).convolutionMode(ConvolutionMode.Same)
+            new SeparableConvolution2D.Builder(2, 2).nOut(16).hasBias(false).convolutionMode(ConvolutionMode.Same)
                 .build(),
             BLOCK2_SEPCONV1_ACTIVATION)
         .addLayer(BLOCK2_SEPARABLE_CONVOLUTION2_BATCH_NORNMALIZATION, new BatchNormalization(), BLOCK2_SEPARABLE_CONVOLUTION2)
